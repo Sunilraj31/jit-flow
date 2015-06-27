@@ -22,6 +22,7 @@ public class RepoUtil
     {
         Git git = Git.init().setDirectory(dir).call();
         git.commit().setMessage("initial commit").call();
+        git.tag().setName("0.9").setAnnotated(true).setMessage("tag release 0.9").call();
 
         return git;
     }

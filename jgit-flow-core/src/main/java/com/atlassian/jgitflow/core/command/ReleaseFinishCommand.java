@@ -8,12 +8,18 @@ import com.atlassian.jgitflow.core.extension.ReleaseFinishExtension;
 import com.atlassian.jgitflow.core.extension.impl.EmptyReleaseFinishExtension;
 import com.atlassian.jgitflow.core.extension.impl.MergeProcessExtensionWrapper;
 
+import com.atlassian.jgitflow.core.util.GitHelper;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.revwalk.RevTag;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 import static com.atlassian.jgitflow.core.util.Preconditions.checkState;
 
@@ -123,7 +129,8 @@ public class ReleaseFinishCommand extends AbstractBranchMergingCommand<ReleaseFi
                 //first merge master
                 MergeProcessExtensionWrapper masterExtension = new MergeProcessExtensionWrapper(extension.beforeMasterCheckout(), extension.afterMasterCheckout(), extension.beforeMasterMerge(), extension.afterMasterMerge());
 
-                masterResult = doMerge(prefixedBranchName, gfConfig.getMaster(), masterExtension, squash);
+                String latestTaggedCommit = GitHelper.findLatestTaggedCommit(git);
+                masterResult = doMerge(prefixedBranchName, latestTaggedCommit, masterExtension, squash);
 
                 //now, tag master
                 if (!noTag && masterResult.getMergeStatus().isSuccessful())

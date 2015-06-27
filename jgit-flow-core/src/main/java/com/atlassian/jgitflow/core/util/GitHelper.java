@@ -14,6 +14,7 @@ import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTag;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.FileTreeIterator;
@@ -609,6 +610,25 @@ public class GitHelper
         {
             throw new JGitFlowGitAPIException(e);
         }
+    }
+
+    public static String findLatestTaggedCommit(Git git) throws GitAPIException, JGitFlowIOException {
+        Ref latestTagRef = findLatestTag(git);
+        RevWalk revWalk = new RevWalk(git.getRepository());
+        try {
+            RevTag latestTag = revWalk.parseTag(latestTagRef.getObjectId());
+            return latestTag.getObject().getName();
+        } catch (IOException e) {
+            throw new JGitFlowIOException(e);
+        }
+    }
+
+    public static Ref findLatestTag(Git git) throws GitAPIException {
+        // TODO implement
+        Ref latestTag = git.tagList().call().get(0);
+//        String simpleTagName = latestTag.getName()
+//                .substring(latestTag.getName().indexOf(Constants.R_TAGS) + Constants.R_TAGS.length());
+        return latestTag;
     }
 
     private static String getName()
