@@ -9,6 +9,7 @@ import com.atlassian.jgitflow.core.exception.JGitFlowGitAPIException;
 import com.atlassian.jgitflow.core.exception.JGitFlowIOException;
 import com.atlassian.jgitflow.core.exception.LocalBranchMissingException;
 
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -596,7 +597,7 @@ public class GitHelper
             List<Ref> refs = git.tagList().call();
             for (Ref ref : refs)
             {
-                String simpleName = ref.getName().substring(ref.getName().indexOf(Constants.R_TAGS) + Constants.R_TAGS.length());
+                String simpleName = getSimpleTagName(ref.getName());
                 if (simpleName.equals(tagName))
                 {
                     exists = true;
@@ -624,11 +625,21 @@ public class GitHelper
     }
 
     public static Ref findLatestTag(Git git) throws GitAPIException {
-        // TODO implement
-        Ref latestTag = git.tagList().call().get(0);
-//        String simpleTagName = latestTag.getName()
-//                .substring(latestTag.getName().indexOf(Constants.R_TAGS) + Constants.R_TAGS.length());
+        List<Ref> tags = git.tagList().call();
+        Comparator<Ref> tagComparator = new Comparator<Ref>() {
+            @Override
+            public int compare(Ref tag1, Ref tag2) {
+                String tag1Version = getSimpleTagName(tag1.getName());
+                String tag2Version = getSimpleTagName(tag2.getName());
+                return new DefaultArtifactVersion(tag1Version).compareTo(new DefaultArtifactVersion(tag2Version));
+            }
+        };
+        Ref latestTag = Collections.max(tags, tagComparator);
         return latestTag;
+    }
+
+    private static String getSimpleTagName(String tagName) {
+        return tagName.substring(tagName.indexOf(Constants.R_TAGS) + Constants.R_TAGS.length());
     }
 
     private static String getName()
