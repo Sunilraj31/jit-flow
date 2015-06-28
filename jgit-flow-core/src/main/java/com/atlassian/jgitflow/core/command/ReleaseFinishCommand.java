@@ -3,26 +3,19 @@ package com.atlassian.jgitflow.core.command;
 import com.atlassian.jgitflow.core.GitFlowConfiguration;
 import com.atlassian.jgitflow.core.JGitFlowConstants;
 import com.atlassian.jgitflow.core.ReleaseMergeResult;
-import com.atlassian.jgitflow.core.TaggedVersion;
 import com.atlassian.jgitflow.core.exception.*;
 import com.atlassian.jgitflow.core.extension.ReleaseFinishExtension;
 import com.atlassian.jgitflow.core.extension.impl.EmptyReleaseFinishExtension;
 import com.atlassian.jgitflow.core.extension.impl.MergeProcessExtensionWrapper;
-import com.atlassian.jgitflow.core.util.GitHelper;
-import org.apache.maven.shared.release.versions.VersionParseException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import static com.atlassian.jgitflow.core.util.Preconditions.checkState;
 
@@ -194,31 +187,6 @@ public class ReleaseFinishCommand extends AbstractBranchMergingCommand<ReleaseFi
             reporter.endCommand();
             reporter.flush();
         }
-    }
-
-    private String findLatestTaggedCommit() throws GitAPIException, JGitFlowGenericException, JGitFlowIOException {
-        String result;
-        List<TaggedVersion> taggedVersions = findTaggedVersions();
-        if (!taggedVersions.isEmpty()) {
-            TaggedVersion latestTaggedVersion = Collections.max(taggedVersions);
-            result = GitHelper.getTaggedCommit(git, latestTaggedVersion.getTag());
-        } else {
-            result = null;
-        }
-        return result;
-    }
-
-    private List<TaggedVersion> findTaggedVersions() throws JGitFlowGenericException, GitAPIException {
-        List<Ref> tags = git.tagList().call();
-        List<TaggedVersion> taggedVersions = new ArrayList<TaggedVersion>();
-        for (Ref tag : tags) {
-            try {
-                taggedVersions.add(new TaggedVersion(GitHelper.getSimpleTagName(tag.getName()), tag));
-            } catch (VersionParseException e) {
-                throw new JGitFlowGenericException("Tag name is not a valid version", e);
-            }
-        }
-        return taggedVersions;
     }
 
     /**

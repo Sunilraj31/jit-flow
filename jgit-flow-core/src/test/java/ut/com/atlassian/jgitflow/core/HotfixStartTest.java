@@ -31,6 +31,19 @@ public class HotfixStartTest extends BaseGitFlowTest
     public void startHotfix() throws Exception
     {
         Git git = RepoUtil.createRepositoryWithMaster(newDir());
+        git.tag().setName("1.0").setAnnotated(true).setMessage("tagging release 1.0").call();
+        JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
+        JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
+
+        flow.hotfixStart("1.1").call();
+
+        assertEquals(flow.getHotfixBranchPrefix() + "1.1", git.getRepository().getBranch());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void startHotfixWithNoTags() throws Exception
+    {
+        Git git = RepoUtil.createRepositoryWithMaster(newDir());
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
@@ -76,6 +89,7 @@ public class HotfixStartTest extends BaseGitFlowTest
         Git git = null;
         Git remoteGit = null;
         remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        remoteGit.tag().setName("1.0").setAnnotated(true).setMessage("tagging release 1.0").call();
 
         git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
 
@@ -83,34 +97,9 @@ public class HotfixStartTest extends BaseGitFlowTest
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
         git.push().setRemote("origin").add("master").call();
 
-        flow.hotfixStart("1.0").setFetch(true).setPush(true).call();
+        flow.hotfixStart("1.1").setFetch(true).setPush(true).call();
 
-        assertTrue(GitHelper.remoteBranchExists(git, "hotfix/1.0"));
-
-    }
-
-    @Test(expected = BranchOutOfDateException.class)
-    public void startHotfixWithFetchLocalBehindMaster() throws Exception
-    {
-        Git git = null;
-        Git remoteGit = null;
-        remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
-
-        git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
-
-        JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
-        JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("master").call();
-
-        //do a commit to the remote develop branch
-        remoteGit.checkout().setName("master").call();
-        File junkFile = new File(remoteGit.getRepository().getWorkTree(), "junk.txt");
-        FileUtils.writeStringToFile(junkFile, "I am junk");
-        remoteGit.add().addFilepattern(junkFile.getName()).call();
-        remoteGit.commit().setMessage("adding junk file").call();
-        remoteGit.tag().setName("1.1").setAnnotated(true).setMessage("tagging release 1.1").call();
-
-        flow.hotfixStart("1.2").setFetch(true).call();
+        assertTrue(GitHelper.remoteBranchExists(git, "hotfix/1.1"));
 
     }
 
@@ -120,6 +109,7 @@ public class HotfixStartTest extends BaseGitFlowTest
         Git git = null;
         Git remoteGit = null;
         remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        remoteGit.tag().setName("1.0").setAnnotated(true).setMessage("tagging release 1.0").call();
 
         git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
 
@@ -299,6 +289,7 @@ public class HotfixStartTest extends BaseGitFlowTest
         Git git = null;
         Git remoteGit = null;
         remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        remoteGit.tag().setName("1.0").setAnnotated(true).setMessage("tagging release 1.0").call();
 
         git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
 
@@ -307,11 +298,11 @@ public class HotfixStartTest extends BaseGitFlowTest
         git.push().setRemote("origin").add("master").call();
 
         //add the remote tag
-        remoteGit.tag().setName(flow.getVersionTagPrefix() + "1.0").call();
+        remoteGit.tag().setName(flow.getVersionTagPrefix() + "1.1").call();
 
-        flow.hotfixStart("1.0").call();
+        flow.hotfixStart("1.1").call();
 
-        assertEquals(flow.getHotfixBranchPrefix() + "1.0", git.getRepository().getBranch());
+        assertEquals(flow.getHotfixBranchPrefix() + "1.1", git.getRepository().getBranch());
 
     }
 }

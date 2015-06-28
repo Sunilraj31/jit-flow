@@ -434,6 +434,7 @@ public class ReleaseFinishTest extends BaseGitFlowTest
     public void finishReleaseAfterHotfix() throws Exception
     {
         Git git = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        git.tag().setName("1.0").setAnnotated(true).setMessage("tagging release 1.0").call();
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 

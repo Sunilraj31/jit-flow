@@ -1,30 +1,31 @@
 package com.atlassian.jgitflow.core.command;
 
-import java.util.concurrent.Callable;
-
 import com.atlassian.jgitflow.core.GitFlowConfiguration;
 import com.atlassian.jgitflow.core.JGitFlowConstants;
 import com.atlassian.jgitflow.core.JGitFlowReporter;
-import com.atlassian.jgitflow.core.exception.BranchOutOfDateException;
-import com.atlassian.jgitflow.core.exception.JGitFlowExtensionException;
-import com.atlassian.jgitflow.core.exception.JGitFlowGitAPIException;
-import com.atlassian.jgitflow.core.exception.JGitFlowIOException;
+import com.atlassian.jgitflow.core.TaggedVersion;
+import com.atlassian.jgitflow.core.exception.*;
 import com.atlassian.jgitflow.core.extension.ExtensionCommand;
 import com.atlassian.jgitflow.core.extension.ExtensionFailStrategy;
 import com.atlassian.jgitflow.core.extension.JGitFlowExtension;
 import com.atlassian.jgitflow.core.util.GitHelper;
 import com.atlassian.jgitflow.core.util.RequirementHelper;
-
+import org.apache.maven.shared.release.versions.VersionParseException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.RefUpdate;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
-import org.eclipse.jgit.transport.TrackingRefUpdate;
+import org.eclipse.jgit.transport.TagOpt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 import static com.atlassian.jgitflow.core.util.Preconditions.checkNotNull;
 
@@ -75,7 +76,7 @@ public abstract class AbstractGitFlowCommand<C, T> implements Callable<T>, JGitF
         {
             runExtensionCommands(fetchingExtension.beforeFetch());
 
-            git.fetch().setRemote(Constants.DEFAULT_REMOTE_NAME).call();
+            git.fetch().setTagOpt(TagOpt.FETCH_TAGS).setRemote(Constants.DEFAULT_REMOTE_NAME).call();
 
             runExtensionCommands(fetchingExtension.afterFetch());
         }
@@ -158,6 +159,35 @@ public abstract class AbstractGitFlowCommand<C, T> implements Callable<T>, JGitF
                 enforcer().requireLocalBranchNotBehindRemote(branchToTest);
             }
         }
+    }
+
+    protected String findLatestTaggedCommit() throws GitAPIException, JGitFlowGenericException, JGitFlowIOException {
+        String result;
+        List<TaggedVersion> taggedVersions = findTaggedVersions();
+        if (!taggedVersions.isEmpty()) {
+            TaggedVersion latestTaggedVersion = Collections.max(taggedVersions);
+            result = GitHelper.getTaggedCommit(git, latestTaggedVersion.getTag());
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    private List<TaggedVersion> findTaggedVersions() throws JGitFlowGenericException, GitAPIException {
+        List<Ref> tags = git.tagList().call();
+        List<TaggedVersion> taggedVersions = new ArrayList<TaggedVersion>();
+        for (Ref tag : tags) {
+            try {
+                String simpleTagName = GitHelper.getSimpleTagName(tag.getName());
+                String tagPrefix = gfConfig.getPrefixValue(JGitFlowConstants.PREFIXES.VERSIONTAG.configKey());
+                String simpleTagNameWithoutPrefix =
+                        simpleTagName.substring(simpleTagName.indexOf(tagPrefix) + tagPrefix.length());
+                taggedVersions.add(new TaggedVersion(simpleTagNameWithoutPrefix, tag));
+            } catch (VersionParseException e) {
+                throw new JGitFlowGenericException("Tag name is not a valid version", e);
+            }
+        }
+        return taggedVersions;
     }
 
     @Override

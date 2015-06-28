@@ -65,7 +65,7 @@ public class HotfixStartCommand extends AbstractBranchCreatingCommand<HotfixStar
      * @throws com.atlassian.jgitflow.core.exception.BranchOutOfDateException
      */
     @Override
-    public Ref call() throws NotInitializedException, JGitFlowGitAPIException, HotfixBranchExistsException, DirtyWorkingTreeException, JGitFlowIOException, LocalBranchExistsException, TagExistsException, BranchOutOfDateException, LocalBranchMissingException, RemoteBranchExistsException, JGitFlowExtensionException
+    public Ref call() throws NotInitializedException, JGitFlowGitAPIException, HotfixBranchExistsException, DirtyWorkingTreeException, JGitFlowIOException, LocalBranchExistsException, TagExistsException, BranchOutOfDateException, LocalBranchMissingException, RemoteBranchExistsException, JGitFlowExtensionException, JGitFlowGenericException
     {
         String prefixedBranchName = runBeforeAndGetPrefixedBranchName(extension.before(), JGitFlowConstants.PREFIXES.HOTFIX);
 
@@ -78,7 +78,11 @@ public class HotfixStartCommand extends AbstractBranchCreatingCommand<HotfixStar
         {
             doFetchIfNeeded(extension);
 
-            Ref newBranch = doCreateBranch(gfConfig.getMaster(), prefixedBranchName, extension);
+            String taggingHead = findLatestTaggedCommit();
+            if (taggingHead == null) {
+                throw new IllegalStateException("Cannot start hotfix when no tagged releases exist");
+            }
+            Ref newBranch = doCreateBranch(taggingHead, prefixedBranchName, extension);
 
             doPushNewBranchIfNeeded(extension, prefixedBranchName);
 
