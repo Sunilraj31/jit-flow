@@ -614,6 +614,7 @@ public class GitHelper
     public static String getTaggedCommit(Git git, Ref tag) throws JGitFlowIOException {
         RevWalk revWalk = new RevWalk(git.getRepository());
         try {
+            // TODO handle lightweight tags
             RevTag annotatedTag = revWalk.parseTag(tag.getObjectId());
             return annotatedTag.getObject().getName();
         } catch (IOException e) {
