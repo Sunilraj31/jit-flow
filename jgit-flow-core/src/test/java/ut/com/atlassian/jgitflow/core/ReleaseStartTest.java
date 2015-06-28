@@ -48,17 +48,17 @@ public class ReleaseStartTest extends BaseGitFlowTest
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
+        git.push().setRemote("origin").add("master").call();
 
         //do a commit to the remote develop branch
-        remoteGit.checkout().setName("develop").call();
+        remoteGit.checkout().setName("master").call();
         File junkFile = new File(remoteGit.getRepository().getWorkTree(), "junk.txt");
         FileUtils.writeStringToFile(junkFile, "I am junk");
         remoteGit.add().addFilepattern(junkFile.getName()).call();
         remoteGit.commit().setMessage("adding junk file").call();
 
         //update local
-        git.checkout().setName("develop").call();
+        git.checkout().setName("master").call();
         git.pull().call();
 
         flow.releaseStart("1.0").setFetch(true).call();
@@ -77,10 +77,10 @@ public class ReleaseStartTest extends BaseGitFlowTest
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
+        git.push().setRemote("origin").add("master").call();
 
         //do a commit to the remote develop branch
-        remoteGit.checkout().setName("develop").call();
+        remoteGit.checkout().setName("master").call();
         File junkFile = new File(remoteGit.getRepository().getWorkTree(), "junk.txt");
         FileUtils.writeStringToFile(junkFile, "I am junk");
         remoteGit.add().addFilepattern(junkFile.getName()).call();
@@ -101,7 +101,7 @@ public class ReleaseStartTest extends BaseGitFlowTest
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
+        git.push().setRemote("origin").add("master").call();
 
         flow.releaseStart("1.0").setFetch(true).setPush(true).call();
 
@@ -120,10 +120,10 @@ public class ReleaseStartTest extends BaseGitFlowTest
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
+        git.push().setRemote("origin").add("master").call();
 
         //do a commit to the remote develop branch
-        remoteGit.checkout().setName("develop").call();
+        remoteGit.checkout().setName("master").call();
         File junkFile = new File(remoteGit.getRepository().getWorkTree(), "junk.txt");
         FileUtils.writeStringToFile(junkFile, "I am junk");
         remoteGit.add().addFilepattern(junkFile.getName()).call();
@@ -190,7 +190,7 @@ public class ReleaseStartTest extends BaseGitFlowTest
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        git.checkout().setName("develop").call();
+        git.checkout().setName("master").call();
         //we should be on develop branch
         assertEquals(flow.getDevelopBranchName(), git.getRepository().getBranch());
 
@@ -274,7 +274,7 @@ public class ReleaseStartTest extends BaseGitFlowTest
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
+        git.push().setRemote("origin").add("master").call();
 
         //add the remote tag
         remoteGit.tag().setName(flow.getVersionTagPrefix() + "1.0").call();
@@ -294,7 +294,7 @@ public class ReleaseStartTest extends BaseGitFlowTest
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
+        git.push().setRemote("origin").add("master").call();
 
         //add the remote tag
         remoteGit.tag().setName(flow.getVersionTagPrefix() + "1.0").call();
@@ -312,7 +312,7 @@ public class ReleaseStartTest extends BaseGitFlowTest
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        git.checkout().setName("develop").call();
+        git.checkout().setName("master").call();
         //we should be on develop branch
         assertEquals(flow.getDevelopBranchName(), git.getRepository().getBranch());
 
@@ -348,7 +348,7 @@ public class ReleaseStartTest extends BaseGitFlowTest
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        git.checkout().setName("develop").call();
+        git.checkout().setName("master").call();
         //we should be on develop branch
         assertEquals(flow.getDevelopBranchName(), git.getRepository().getBranch());
 
@@ -385,7 +385,7 @@ public class ReleaseStartTest extends BaseGitFlowTest
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        git.checkout().setName("develop").call();
+        git.checkout().setName("master").call();
         //we should be on develop branch
         assertEquals(flow.getDevelopBranchName(), git.getRepository().getBranch());
 
@@ -423,7 +423,7 @@ public class ReleaseStartTest extends BaseGitFlowTest
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        git.checkout().setName("develop").call();
+        git.checkout().setName("master").call();
         //we should be on develop branch
         assertEquals(flow.getDevelopBranchName(), git.getRepository().getBranch());
 
@@ -463,7 +463,7 @@ public class ReleaseStartTest extends BaseGitFlowTest
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        git.checkout().setName("develop").call();
+        git.checkout().setName("master").call();
         //we should be on develop branch
         assertEquals(flow.getDevelopBranchName(), git.getRepository().getBranch());
 
@@ -491,7 +491,7 @@ public class ReleaseStartTest extends BaseGitFlowTest
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        git.checkout().setName("develop").call();
+        git.checkout().setName("master").call();
         //we should be on develop branch
         assertEquals(flow.getDevelopBranchName(), git.getRepository().getBranch());
 
