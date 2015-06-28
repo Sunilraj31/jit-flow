@@ -5,6 +5,7 @@ import com.atlassian.jgitflow.core.JGitFlowInitCommand;
 import com.atlassian.jgitflow.core.ReleaseMergeResult;
 import com.atlassian.jgitflow.core.exception.BranchOutOfDateException;
 import com.atlassian.jgitflow.core.exception.DirtyWorkingTreeException;
+import com.atlassian.jgitflow.core.exception.JGitFlowIOException;
 import com.atlassian.jgitflow.core.util.GitHelper;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
@@ -16,6 +17,7 @@ import org.junit.Test;
 import ut.com.atlassian.jgitflow.core.testutils.RepoUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -54,11 +56,13 @@ public class ReleaseFinishTest extends BaseGitFlowTest
     {
         Git git = RepoUtil.createRepositoryWithMaster(newDir());
         git.tag().setName("0.9").setAnnotated(true).setMessage("tagged release 0.9").call();
+        git.commit().setMessage("sample commit").call();
         git.tag().setName("0.12").setAnnotated(true).setMessage("tagged release 0.12").call();
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
         flow.releaseStart("1.0").call();
+        git.commit().setMessage("sample commit on release branch").call();
 
         assertEquals(flow.getReleaseBranchPrefix() + "1.0", git.getRepository().getBranch());
 
@@ -72,6 +76,10 @@ public class ReleaseFinishTest extends BaseGitFlowTest
         //release branch should be gone
         Ref ref2check = git.getRepository().getRef(flow.getReleaseBranchPrefix() + "1.0");
         assertNull(ref2check);
+
+        // new tag should be based on latest tag
+        RevCommit parent = GitHelper.getCommitForString(git, getTaggedCommit(git, "1.0")).getParent(0);
+        assertEquals(getTaggedCommit(git, "0.12"), parent.toObjectId().getName());
     }
 
     @Test(expected = DirtyWorkingTreeException.class)
@@ -148,12 +156,11 @@ public class ReleaseFinishTest extends BaseGitFlowTest
         //since fast-forward is suppressed the latest commit on develop should be a merge commit with 2 parents
         assertEquals(2, GitHelper.getLatestCommit(git, flow.getDevelopBranchName()).getParentCount());
 
-        String taggedCommit = GitHelper.getTaggedCommit(git, git.getRepository().getRef("1.0"));
         //the master branch should have our commit
-        assertTrue(GitHelper.isMergedInto(git, commit, taggedCommit));
+        assertTrue(GitHelper.isMergedInto(git, commit, getTaggedCommit(git, "1.0")));
 
         //since fast-forward is suppressed the latest commit on master should be a merge commit with 2 parents
-        assertEquals(2, GitHelper.getLatestCommit(git, taggedCommit).getParentCount());
+        assertEquals(2, GitHelper.getLatestCommit(git, getTaggedCommit(git, "1.0")).getParentCount());
     }
 
     @Test
@@ -473,4 +480,7 @@ public class ReleaseFinishTest extends BaseGitFlowTest
 
     }
 
+    private String getTaggedCommit(Git git, String tagName) throws JGitFlowIOException, IOException {
+        return GitHelper.getTaggedCommit(git, git.getRepository().getRef(tagName));
+    }
 }
