@@ -1,15 +1,11 @@
 package ut.com.atlassian.jgitflow.core;
 
-import java.io.File;
-import java.util.List;
-
 import com.atlassian.jgitflow.core.JGitFlow;
 import com.atlassian.jgitflow.core.JGitFlowInitCommand;
 import com.atlassian.jgitflow.core.ReleaseMergeResult;
 import com.atlassian.jgitflow.core.exception.BranchOutOfDateException;
 import com.atlassian.jgitflow.core.exception.DirtyWorkingTreeException;
 import com.atlassian.jgitflow.core.util.GitHelper;
-
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
@@ -17,8 +13,10 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Test;
-
 import ut.com.atlassian.jgitflow.core.testutils.RepoUtil;
+
+import java.io.File;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -54,7 +52,7 @@ public class ReleaseFinishTest extends BaseGitFlowTest
     @Test
     public void finishReleaseWithExistingTags() throws Exception
     {
-        Git git = RepoUtil.createRepositoryWithoutMaster(newDir());
+        Git git = RepoUtil.createRepositoryWithMaster(newDir());
         git.tag().setName("0.9").setAnnotated(true).setMessage("tagged release 0.9").call();
         git.tag().setName("0.12").setAnnotated(true).setMessage("tagged release 0.12").call();
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
@@ -116,7 +114,7 @@ public class ReleaseFinishTest extends BaseGitFlowTest
     @Test
     public void finishReleaseWithNewCommit() throws Exception
     {
-        Git git = RepoUtil.createRepositoryWithoutMaster(newDir());
+        Git git = RepoUtil.createRepositoryWithMaster(newDir());
         git.tag().setName("0.9").setAnnotated(true).setMessage("tagged release 0.9").call();
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();

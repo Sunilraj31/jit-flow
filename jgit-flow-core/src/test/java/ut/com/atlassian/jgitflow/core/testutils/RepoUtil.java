@@ -18,15 +18,6 @@ public class RepoUtil
         return git;
     }
 
-    public static Git createRepositoryWithoutMaster(File dir) throws GitAPIException
-    {
-        Git git = Git.init().setDirectory(dir).call();
-        git.commit().setMessage("initial commit").call();
-        git.branchRename().setOldName("master").setNewName("develop").call();
-
-        return git;
-    }
-
     public static Git createRepositoryWithMaster(File dir) throws GitAPIException
     {
         Git git = Git.init().setDirectory(dir).call();
@@ -39,8 +30,7 @@ public class RepoUtil
     {
         Git git = Git.init().setDirectory(dir).call();
         git.commit().setMessage("initial commit").call();
-        git.branchCreate().setName("develop").call();
-        git.commit().setMessage("added develop branch").call();
+        // TODO remove this method, replace with createRepositoryWithMaster
 
         return git;
     }
