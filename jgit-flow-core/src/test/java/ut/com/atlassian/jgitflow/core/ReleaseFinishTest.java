@@ -148,12 +148,12 @@ public class ReleaseFinishTest extends BaseGitFlowTest
         //since fast-forward is suppressed the latest commit on develop should be a merge commit with 2 parents
         assertEquals(2, GitHelper.getLatestCommit(git, flow.getDevelopBranchName()).getParentCount());
 
-        Ref tag = git.getRepository().getRef("1.0");
+        String taggedCommit = GitHelper.getTaggedCommit(git, git.getRepository().getRef("1.0"));
         //the master branch should have our commit
-        assertTrue(GitHelper.isMergedInto(git, commit, GitHelper.getTaggedCommit(git, tag)));
+        assertTrue(GitHelper.isMergedInto(git, commit, taggedCommit));
 
         //since fast-forward is suppressed the latest commit on master should be a merge commit with 2 parents
-        assertEquals(2, GitHelper.getLatestCommit(git, GitHelper.getTaggedCommit(git, tag)).getParentCount());
+        assertEquals(2, GitHelper.getLatestCommit(git, taggedCommit).getParentCount());
     }
 
     @Test
