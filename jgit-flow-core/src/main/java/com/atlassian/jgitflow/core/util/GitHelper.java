@@ -1,15 +1,12 @@
 package com.atlassian.jgitflow.core.util;
 
-import java.io.IOException;
-import java.util.*;
-
 import com.atlassian.jgitflow.core.JGitFlowConstants;
 import com.atlassian.jgitflow.core.JGitFlowReporter;
+import com.atlassian.jgitflow.core.TaggedVersion;
 import com.atlassian.jgitflow.core.exception.JGitFlowGitAPIException;
 import com.atlassian.jgitflow.core.exception.JGitFlowIOException;
 import com.atlassian.jgitflow.core.exception.LocalBranchMissingException;
-
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.shared.release.versions.VersionParseException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -20,6 +17,9 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.FileTreeIterator;
 import org.eclipse.jgit.util.StringUtils;
+
+import java.io.IOException;
+import java.util.*;
 
 import static com.atlassian.jgitflow.core.util.Preconditions.checkNotNull;
 
@@ -624,18 +624,18 @@ public class GitHelper
         }
     }
 
-    public static Ref findLatestTag(Git git) throws GitAPIException {
+    private static Ref findLatestTag(Git git) throws GitAPIException {
         List<Ref> tags = git.tagList().call();
-        Comparator<Ref> tagComparator = new Comparator<Ref>() {
-            @Override
-            public int compare(Ref tag1, Ref tag2) {
-                String tag1Version = getSimpleTagName(tag1.getName());
-                String tag2Version = getSimpleTagName(tag2.getName());
-                return new DefaultArtifactVersion(tag1Version).compareTo(new DefaultArtifactVersion(tag2Version));
+        List<TaggedVersion> taggedVersions = new ArrayList<TaggedVersion>();
+        for (Ref tag : tags) {
+            try {
+                taggedVersions.add(new TaggedVersion(getSimpleTagName(tag.getName()), tag));
+            } catch (VersionParseException e) {
+                // skip tags that are not valid version numbers
             }
-        };
-        Ref latestTag = Collections.max(tags, tagComparator);
-        return latestTag;
+        }
+        TaggedVersion latestTaggedVersion = Collections.max(taggedVersions);
+        return latestTaggedVersion.getTag();
     }
 
     private static String getSimpleTagName(String tagName) {
