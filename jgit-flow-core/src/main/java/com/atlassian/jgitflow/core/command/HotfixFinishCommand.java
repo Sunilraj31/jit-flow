@@ -1,5 +1,6 @@
 package com.atlassian.jgitflow.core.command;
 
+import java.io.IOException;
 import java.util.List;
 
 import com.atlassian.jgitflow.core.GitFlowConfiguration;
@@ -14,6 +15,7 @@ import com.atlassian.jgitflow.core.util.GitHelper;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.util.StringUtils;
 
@@ -92,9 +94,8 @@ public class HotfixFinishCommand extends AbstractBranchMergingCommand<HotfixFini
      * @throws com.atlassian.jgitflow.core.exception.BranchOutOfDateException
      */
     @Override
-    public ReleaseMergeResult call() throws JGitFlowGitAPIException, LocalBranchMissingException, DirtyWorkingTreeException, JGitFlowIOException, BranchOutOfDateException, JGitFlowExtensionException, NotInitializedException
-    {
-        String prefixedBranchName = runBeforeAndGetPrefixedBranchName(extension.before(), JGitFlowConstants.PREFIXES.HOTFIX);
+    public ReleaseMergeResult call() throws JGitFlowGitAPIException, LocalBranchMissingException, DirtyWorkingTreeException, JGitFlowIOException, BranchOutOfDateException, JGitFlowExtensionException, NotInitializedException, JGitFlowGenericException
+    { String prefixedBranchName = runBeforeAndGetPrefixedBranchName(extension.before(), JGitFlowConstants.PREFIXES.HOTFIX);
 
         enforcer().requireGitFlowInitialized();
         enforcer().requireLocalBranchExists(prefixedBranchName);
@@ -107,31 +108,36 @@ public class HotfixFinishCommand extends AbstractBranchMergingCommand<HotfixFini
         {
             doFetchIfNeeded(extension);
 
-            ensureLocalBranchesNotBehindRemotes(prefixedBranchName, gfConfig.getMaster(), gfConfig.getDevelop());
+            ensureLocalBranchesNotBehindRemotes(prefixedBranchName, gfConfig.getDevelop());
 
             //checkout the branch to merge just so we can run any extensions that need to be on this branch
             checkoutTopicBranch(prefixedBranchName, extension);
 
             //first merge master
             MergeProcessExtensionWrapper masterExtension = new MergeProcessExtensionWrapper(extension.beforeMasterCheckout(), extension.afterMasterCheckout(), extension.beforeMasterMerge(), extension.afterMasterMerge());
-            masterResult = doMerge(prefixedBranchName, gfConfig.getMaster(), masterExtension);
+            String taggingHead = findLatestTaggedCommit();
+            if (taggingHead == null) {
+                taggingHead = prefixedBranchName;
+            }
+            masterResult = doMerge(prefixedBranchName, taggingHead, masterExtension);
 
             //now, tag master
             if (!noTag && masterResult.getMergeStatus().isSuccessful())
             {
-                doTag(gfConfig.getMaster(), message, masterResult, extension);
+                doTag(Constants.HEAD, message, masterResult, extension);
             }
 
             //IMPORTANT: we need to back-merge master into develop so that git describe works properly
             MergeProcessExtensionWrapper developExtension = new MergeProcessExtensionWrapper(extension.beforeDevelopCheckout(), extension.afterDevelopCheckout(), extension.beforeDevelopMerge(), extension.afterDevelopMerge());
 
-            developResult = doMerge(gfConfig.getMaster(), gfConfig.getDevelop(), developExtension);
+            taggingHead = git.getRepository().resolve(Constants.HEAD).getName();
+            developResult = doMerge(taggingHead, gfConfig.getDevelop(), developExtension);
 
             boolean mergeSuccess = checkMergeResults(masterResult, developResult);
 
             if (mergeSuccess)
             {
-                doPushIfNeeded(extension, !noTag, gfConfig.getDevelop(), gfConfig.getMaster(), prefixedBranchName);
+                doPushIfNeeded(extension, !noTag, gfConfig.getDevelop(), prefixedBranchName);
             }
 
             //Backmerge to release branch if needed
@@ -140,7 +146,8 @@ public class HotfixFinishCommand extends AbstractBranchMergingCommand<HotfixFini
                 String releaseBranchName = getReleaseBranchName();
                 MergeProcessExtensionWrapper releaseExtension = new MergeProcessExtensionWrapper(extension.beforeReleaseCheckout(), extension.afterReleaseCheckout(), extension.beforeReleaseMerge(), extension.afterReleaseMerge());
 
-                releaseResult = doMerge(gfConfig.getMaster(), releaseBranchName, releaseExtension);
+                taggingHead = git.getRepository().resolve(Constants.HEAD).getName();
+                releaseResult = doMerge(taggingHead, releaseBranchName, releaseExtension);
 
                 boolean releaseMergeSuccess = checkMergeResults(releaseResult);
 
@@ -165,6 +172,11 @@ public class HotfixFinishCommand extends AbstractBranchMergingCommand<HotfixFini
         catch (GitAPIException e)
         {
             throw new JGitFlowGitAPIException(e);
+        }
+        catch (IOException e)
+        {
+            reporter.errorText(getCommandName(), e.getMessage());
+            throw new JGitFlowGenericException(e);
         }
         finally
         {

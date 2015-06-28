@@ -1,13 +1,11 @@
 package ut.com.atlassian.jgitflow.core;
 
-import java.io.File;
-
 import com.atlassian.jgitflow.core.JGitFlow;
 import com.atlassian.jgitflow.core.JGitFlowInitCommand;
 import com.atlassian.jgitflow.core.exception.BranchOutOfDateException;
 import com.atlassian.jgitflow.core.exception.DirtyWorkingTreeException;
+import com.atlassian.jgitflow.core.exception.JGitFlowIOException;
 import com.atlassian.jgitflow.core.util.GitHelper;
-
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Ref;
@@ -15,8 +13,10 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTag;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.junit.Test;
-
 import ut.com.atlassian.jgitflow.core.testutils.RepoUtil;
+
+import java.io.File;
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 
@@ -344,10 +344,6 @@ public class HotfixFinishTest extends BaseGitFlowTest
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        String masterBranchName = flow.getMasterBranchName();
-
-        RevCommit oldMasterHead = GitHelper.getLatestCommit(git, masterBranchName);
-
         flow.hotfixStart("1.1").call();
 
         // Make sure we move away from master on a hotfix branch
@@ -373,15 +369,13 @@ public class HotfixFinishTest extends BaseGitFlowTest
 
         assertNotNull(hotfixTag);
 
-        RevCommit newMasterHead = GitHelper.getLatestCommit(git, masterBranchName);
-
-        // Check that master has moved
-        assertFalse(newMasterHead.equals(oldMasterHead));
-
-        // Hotfix tag should reference new master
-        assertEquals(newMasterHead, hotfixTag.getObject());
+        // Check that latest tag has moved
+        assertFalse(getTaggedCommit(git, "1.1").equals(getTaggedCommit(git, "1.0")));
     }
 
     //TODO: add tests for push and tag flags
 
+    private String getTaggedCommit(Git git, String tagName) throws JGitFlowIOException, IOException {
+        return GitHelper.getTaggedCommit(git, git.getRepository().getRef(tagName));
+    }
 }
