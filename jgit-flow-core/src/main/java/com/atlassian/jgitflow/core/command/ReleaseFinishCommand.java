@@ -134,8 +134,11 @@ public class ReleaseFinishCommand extends AbstractBranchMergingCommand<ReleaseFi
                 //first merge master
                 MergeProcessExtensionWrapper masterExtension = new MergeProcessExtensionWrapper(extension.beforeMasterCheckout(), extension.afterMasterCheckout(), extension.beforeMasterMerge(), extension.afterMasterMerge());
 
-                String latestTaggedCommit = findLatestTaggedCommit();
-                masterResult = doMerge(prefixedBranchName, latestTaggedCommit, masterExtension, squash);
+                String taggingHead = findLatestTaggedCommit();
+                if (taggingHead == null) {
+                    taggingHead = prefixedBranchName;
+                }
+                masterResult = doMerge(prefixedBranchName, taggingHead, masterExtension, squash);
 
                 //now, tag master
                 if (!noTag && masterResult.getMergeStatus().isSuccessful())
@@ -151,8 +154,8 @@ public class ReleaseFinishCommand extends AbstractBranchMergingCommand<ReleaseFi
                     log.debug("back merging master to develop...");
                 }
 
-                latestTaggedCommit = git.getRepository().resolve(Constants.HEAD).getName();
-                developResult = doMerge(latestTaggedCommit, gfConfig.getDevelop(), developExtension, squash);
+                taggingHead = git.getRepository().resolve(Constants.HEAD).getName();
+                developResult = doMerge(taggingHead, gfConfig.getDevelop(), developExtension, squash);
 
                 mergeSuccess = checkMergeResults(masterResult, developResult);
 
@@ -196,9 +199,15 @@ public class ReleaseFinishCommand extends AbstractBranchMergingCommand<ReleaseFi
     }
 
     private String findLatestTaggedCommit() throws GitAPIException, JGitFlowGenericException, JGitFlowIOException {
+        String result;
         List<TaggedVersion> taggedVersions = findTaggedVersions();
-        TaggedVersion latestTaggedVersion = Collections.max(taggedVersions);
-        return GitHelper.getTaggedCommit(git, latestTaggedVersion.getTag());
+        if (!taggedVersions.isEmpty()) {
+            TaggedVersion latestTaggedVersion = Collections.max(taggedVersions);
+            result = GitHelper.getTaggedCommit(git, latestTaggedVersion.getTag());
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     private List<TaggedVersion> findTaggedVersions() throws JGitFlowGenericException, GitAPIException {
