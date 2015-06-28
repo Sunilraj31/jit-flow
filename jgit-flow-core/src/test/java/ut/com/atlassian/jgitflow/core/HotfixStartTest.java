@@ -30,8 +30,7 @@ public class HotfixStartTest extends BaseGitFlowTest
     @Test
     public void startHotfix() throws Exception
     {
-        Git git = RepoUtil.createRepositoryWithMaster(newDir());
-        git.tag().setName("1.0").setAnnotated(true).setMessage("tagging release 1.0").call();
+        Git git = RepoUtil.createRepositoryWithMasterAndTag(newDir());
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
@@ -88,8 +87,7 @@ public class HotfixStartTest extends BaseGitFlowTest
     {
         Git git = null;
         Git remoteGit = null;
-        remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
-        remoteGit.tag().setName("1.0").setAnnotated(true).setMessage("tagging release 1.0").call();
+        remoteGit = RepoUtil.createRepositoryWithMasterAndTag(newDir());
 
         git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
 
@@ -108,8 +106,7 @@ public class HotfixStartTest extends BaseGitFlowTest
     {
         Git git = null;
         Git remoteGit = null;
-        remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
-        remoteGit.tag().setName("1.0").setAnnotated(true).setMessage("tagging release 1.0").call();
+        remoteGit = RepoUtil.createRepositoryWithMasterAndTag(newDir());
 
         git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
 
@@ -288,8 +285,7 @@ public class HotfixStartTest extends BaseGitFlowTest
     {
         Git git = null;
         Git remoteGit = null;
-        remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
-        remoteGit.tag().setName("1.0").setAnnotated(true).setMessage("tagging release 1.0").call();
+        remoteGit = RepoUtil.createRepositoryWithMasterAndTag(newDir());
 
         git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
 

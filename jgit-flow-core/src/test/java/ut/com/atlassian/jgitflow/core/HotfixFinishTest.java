@@ -28,21 +28,21 @@ public class HotfixFinishTest extends BaseGitFlowTest
     @Test
     public void finishHotfix() throws Exception
     {
-        Git git = RepoUtil.createRepositoryWithMaster(newDir());
+        Git git = RepoUtil.createRepositoryWithMasterAndTag(newDir());
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        flow.hotfixStart("1.0").call();
+        flow.hotfixStart("1.1").call();
 
-        assertEquals(flow.getHotfixBranchPrefix() + "1.0", git.getRepository().getBranch());
+        assertEquals(flow.getHotfixBranchPrefix() + "1.1", git.getRepository().getBranch());
 
-        flow.hotfixFinish("1.0").call();
+        flow.hotfixFinish("1.1").call();
 
         //we should be on develop branch
         assertEquals(flow.getDevelopBranchName(), git.getRepository().getBranch());
 
         //release branch should be gone
-        Ref ref2check = git.getRepository().getRef(flow.getHotfixBranchPrefix() + "1.0");
+        Ref ref2check = git.getRepository().getRef(flow.getHotfixBranchPrefix() + "1.1");
         assertNull(ref2check);
 
     }

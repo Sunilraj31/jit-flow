@@ -55,9 +55,9 @@ public class ReleaseFinishTest extends BaseGitFlowTest
     public void finishReleaseWithExistingTags() throws Exception
     {
         Git git = RepoUtil.createRepositoryWithMaster(newDir());
-        git.tag().setName("0.9").setAnnotated(true).setMessage("tagged release 0.9").call();
+        git.tag().setName("0.9").setAnnotated(true).setMessage("tagging release 0.9").call();
         git.commit().setMessage("sample commit").call();
-        git.tag().setName("0.12").setAnnotated(true).setMessage("tagged release 0.12").call();
+        git.tag().setName("0.12").setAnnotated(true).setMessage("tagging release 0.12").call();
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
@@ -122,12 +122,11 @@ public class ReleaseFinishTest extends BaseGitFlowTest
     @Test
     public void finishReleaseWithNewCommit() throws Exception
     {
-        Git git = RepoUtil.createRepositoryWithMaster(newDir());
-        git.tag().setName("0.9").setAnnotated(true).setMessage("tagged release 0.9").call();
+        Git git = RepoUtil.createRepositoryWithMasterAndTag(newDir());
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        flow.releaseStart("1.0").call();
+        flow.releaseStart("2.0").call();
 
         //create a new commit
         File junkFile = new File(git.getRepository().getWorkTree(), "junk.txt");
@@ -139,7 +138,7 @@ public class ReleaseFinishTest extends BaseGitFlowTest
         assertFalse(GitHelper.isMergedInto(git, commit, flow.getDevelopBranchName()));
 
         //try to finish
-        ReleaseMergeResult result = flow.releaseFinish("1.0").call();
+        ReleaseMergeResult result = flow.releaseFinish("2.0").call();
 
         assertTrue(result.wasSuccessful());
 
@@ -147,7 +146,7 @@ public class ReleaseFinishTest extends BaseGitFlowTest
         assertEquals(flow.getDevelopBranchName(), git.getRepository().getBranch());
 
         //release branch should be gone
-        Ref ref2check = git.getRepository().getRef(flow.getReleaseBranchPrefix() + "1.0");
+        Ref ref2check = git.getRepository().getRef(flow.getReleaseBranchPrefix() + "2.0");
         assertNull(ref2check);
 
         //the develop branch should have our commit
@@ -157,10 +156,10 @@ public class ReleaseFinishTest extends BaseGitFlowTest
         assertEquals(2, GitHelper.getLatestCommit(git, flow.getDevelopBranchName()).getParentCount());
 
         //the master branch should have our commit
-        assertTrue(GitHelper.isMergedInto(git, commit, getTaggedCommit(git, "1.0")));
+        assertTrue(GitHelper.isMergedInto(git, commit, getTaggedCommit(git, "2.0")));
 
         //since fast-forward is suppressed the latest commit on master should be a merge commit with 2 parents
-        assertEquals(2, GitHelper.getLatestCommit(git, getTaggedCommit(git, "1.0")).getParentCount());
+        assertEquals(2, GitHelper.getLatestCommit(git, getTaggedCommit(git, "2.0")).getParentCount());
     }
 
     @Test
@@ -433,8 +432,7 @@ public class ReleaseFinishTest extends BaseGitFlowTest
     @Test
     public void finishReleaseAfterHotfix() throws Exception
     {
-        Git git = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
-        git.tag().setName("1.0").setAnnotated(true).setMessage("tagging release 1.0").call();
+        Git git = RepoUtil.createRepositoryWithMasterAndTag(newDir());
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 

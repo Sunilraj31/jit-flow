@@ -26,6 +26,13 @@ public class RepoUtil
         return git;
     }
 
+    public static Git createRepositoryWithMasterAndTag(File dir) throws GitAPIException
+    {
+        Git git = createRepositoryWithMaster(dir);
+        git.tag().setName("1.0").setAnnotated(true).setMessage("tagging release 1.0").call();
+        return git;
+    }
+
     public static Git createRepositoryWithMasterAndDevelop(File dir) throws GitAPIException
     {
         Git git = Git.init().setDirectory(dir).call();
