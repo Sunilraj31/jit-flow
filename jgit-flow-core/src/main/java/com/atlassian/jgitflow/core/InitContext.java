@@ -48,8 +48,8 @@ public class InitContext
      */
     public InitContext()
     {
-        this.master = "master";
-        this.develop = "develop";
+        this.master = "TODO:DELETE_THIS";
+        this.develop = "master";
         this.feature = "feature/";
         this.release = "release/";
         this.hotfix = "hotfix/";

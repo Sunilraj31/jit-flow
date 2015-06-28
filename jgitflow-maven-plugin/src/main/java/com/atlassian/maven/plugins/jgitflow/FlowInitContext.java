@@ -16,8 +16,8 @@ public class FlowInitContext
 
     public FlowInitContext()
     {
-        this.masterBranchName = "master";
-        this.developBranchName = "develop";
+        this.masterBranchName = "TODO:DELETE_THIS";
+        this.developBranchName = "master";
         this.featureBranchPrefix = "feature/";
         this.releaseBranchPrefix = "release/";
         this.hotfixBranchPrefix = "hotfix/";
