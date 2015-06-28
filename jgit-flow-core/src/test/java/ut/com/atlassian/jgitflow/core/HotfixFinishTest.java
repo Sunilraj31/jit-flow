@@ -53,7 +53,7 @@ public class HotfixFinishTest extends BaseGitFlowTest
         String hfOneLabel = "1.0.1";
         String hfTwoLabel = "1.0.2";
 
-        Git git = RepoUtil.createRepositoryWithMaster(newDir());
+        Git git = RepoUtil.createRepositoryWithMasterAndTag(newDir());
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
@@ -92,28 +92,28 @@ public class HotfixFinishTest extends BaseGitFlowTest
     @Test(expected = DirtyWorkingTreeException.class)
     public void finishHotfixWithUnStagedFile() throws Exception
     {
-        Git git = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        Git git = RepoUtil.createRepositoryWithMasterAndTag(newDir());
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        flow.hotfixStart("1.0").call();
+        flow.hotfixStart("1.1").call();
 
         //create a new file
         File junkFile = new File(git.getRepository().getWorkTree(), "junk.txt");
         FileUtils.writeStringToFile(junkFile, "I am junk");
 
         //try to finish
-        flow.hotfixFinish("1.0").call();
+        flow.hotfixFinish("1.1").call();
     }
 
     @Test(expected = DirtyWorkingTreeException.class)
     public void finishHotfixUnCommittedFile() throws Exception
     {
-        Git git = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        Git git = RepoUtil.createRepositoryWithMasterAndTag(newDir());
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        flow.hotfixStart("1.0").call();
+        flow.hotfixStart("1.1").call();
 
         //create a new file and add it to the index
         File junkFile = new File(git.getRepository().getWorkTree(), "junk.txt");
@@ -121,17 +121,17 @@ public class HotfixFinishTest extends BaseGitFlowTest
         git.add().addFilepattern(junkFile.getName()).call();
 
         //try to finish
-        flow.hotfixFinish("1.0").call();
+        flow.hotfixFinish("1.1").call();
     }
 
     @Test
     public void finishHotfixWithNewCommit() throws Exception
     {
-        Git git = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        Git git = RepoUtil.createRepositoryWithMasterAndTag(newDir());
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        flow.hotfixStart("1.0").call();
+        flow.hotfixStart("1.1").call();
 
         //create a new commit
         File junkFile = new File(git.getRepository().getWorkTree(), "junk.txt");
@@ -143,13 +143,13 @@ public class HotfixFinishTest extends BaseGitFlowTest
         assertFalse(GitHelper.isMergedInto(git, commit, flow.getDevelopBranchName()));
 
         //try to finish
-        flow.hotfixFinish("1.0").call();
+        flow.hotfixFinish("1.1").call();
 
         //we should be on develop branch
         assertEquals(flow.getDevelopBranchName(), git.getRepository().getBranch());
 
         //release branch should be gone
-        Ref ref2check = git.getRepository().getRef(flow.getHotfixBranchPrefix() + "1.0");
+        Ref ref2check = git.getRepository().getRef(flow.getHotfixBranchPrefix() + "1.1");
         assertNull(ref2check);
 
         //the develop branch should have our commit
@@ -168,17 +168,17 @@ public class HotfixFinishTest extends BaseGitFlowTest
     @Test
     public void finishHotfixWithNewCommitAndReleaseBranch() throws Exception
     {
-        Git git = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        Git git = RepoUtil.createRepositoryWithMasterAndTag(newDir());
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        flow.releaseStart("1.0").call();
+        flow.releaseStart("1.1").call();
 
-        String releaseName = "release/1.0";
+        String releaseName = "release/1.1";
 
         flow.git().checkout().setName("master").call();
 
-        flow.hotfixStart("1.0.1").call();
+        flow.hotfixStart("1.1.1").call();
 
         //create a new commit
         File junkFile = new File(git.getRepository().getWorkTree(), "junk.txt");
@@ -193,13 +193,13 @@ public class HotfixFinishTest extends BaseGitFlowTest
         assertFalse(GitHelper.isMergedInto(git, commit, releaseName));
 
         //try to finish
-        flow.hotfixFinish("1.0.1").setKeepBranch(false).call();
+        flow.hotfixFinish("1.1.1").setKeepBranch(false).call();
 
         //we should be on develop branch
         assertEquals(flow.getDevelopBranchName(), git.getRepository().getBranch());
 
         //hotfix branch should be gone
-        Ref ref2check = git.getRepository().getRef(flow.getHotfixBranchPrefix() + "1.0.1");
+        Ref ref2check = git.getRepository().getRef(flow.getHotfixBranchPrefix() + "1.1.1");
         assertNull(ref2check);
 
         //the develop branch should have our commit
@@ -224,33 +224,33 @@ public class HotfixFinishTest extends BaseGitFlowTest
     @Test
     public void finishHotfixKeepBranch() throws Exception
     {
-        Git git = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        Git git = RepoUtil.createRepositoryWithMasterAndTag(newDir());
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        flow.hotfixStart("1.0").call();
+        flow.hotfixStart("1.1").call();
 
         //just in case
-        assertEquals(flow.getHotfixBranchPrefix() + "1.0", git.getRepository().getBranch());
+        assertEquals(flow.getHotfixBranchPrefix() + "1.1", git.getRepository().getBranch());
 
-        flow.hotfixFinish("1.0").setKeepBranch(true).call();
+        flow.hotfixFinish("1.1").setKeepBranch(true).call();
 
         //we should be on develop branch
         assertEquals(flow.getDevelopBranchName(), git.getRepository().getBranch());
 
         //release branch should still exist
-        Ref ref2check = git.getRepository().getRef(flow.getHotfixBranchPrefix() + "1.0");
+        Ref ref2check = git.getRepository().getRef(flow.getHotfixBranchPrefix() + "1.1");
         assertNotNull(ref2check);
     }
 
     @Test
     public void finishHotfixWithMultipleCommits() throws Exception
     {
-        Git git = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        Git git = RepoUtil.createRepositoryWithMasterAndTag(newDir());
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        flow.hotfixStart("1.0").call();
+        flow.hotfixStart("1.1").call();
 
         //create a new commit
         File junkFile = new File(git.getRepository().getWorkTree(), "junk.txt");
@@ -269,13 +269,13 @@ public class HotfixFinishTest extends BaseGitFlowTest
         assertFalse(GitHelper.isMergedInto(git, commit2, flow.getDevelopBranchName()));
 
         //try to finish
-        flow.hotfixFinish("1.0").call();
+        flow.hotfixFinish("1.1").call();
 
         //we should be on develop branch
         assertEquals(flow.getDevelopBranchName(), git.getRepository().getBranch());
 
         //release branch should be gone
-        Ref ref2check = git.getRepository().getRef(flow.getHotfixBranchPrefix() + "1.0");
+        Ref ref2check = git.getRepository().getRef(flow.getHotfixBranchPrefix() + "1.1");
         assertNull(ref2check);
 
         //the develop branch should have both of our commits now
@@ -292,14 +292,14 @@ public class HotfixFinishTest extends BaseGitFlowTest
     {
         Git git = null;
         Git remoteGit = null;
-        remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        remoteGit = RepoUtil.createRepositoryWithMasterAndTag(newDir());
 
         git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        flow.hotfixStart("1.0").call();
+        flow.hotfixStart("1.1").call();
 
         //do a commit to the remote develop branch
         remoteGit.checkout().setName(flow.getDevelopBranchName());
@@ -308,7 +308,7 @@ public class HotfixFinishTest extends BaseGitFlowTest
         remoteGit.add().addFilepattern(junkFile.getName()).call();
         remoteGit.commit().setMessage("adding junk file").call();
 
-        flow.hotfixFinish("1.0").setFetch(true).call();
+        flow.hotfixFinish("1.1").setFetch(true).call();
 
     }
 
@@ -317,14 +317,14 @@ public class HotfixFinishTest extends BaseGitFlowTest
     {
         Git git = null;
         Git remoteGit = null;
-        remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        remoteGit = RepoUtil.createRepositoryWithMasterAndTag(newDir());
 
         git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        flow.hotfixStart("1.0").call();
+        flow.hotfixStart("1.1").call();
 
         //do a commit to the remote develop branch
         remoteGit.checkout().setName(flow.getMasterBranchName());
@@ -333,14 +333,14 @@ public class HotfixFinishTest extends BaseGitFlowTest
         remoteGit.add().addFilepattern(junkFile.getName()).call();
         remoteGit.commit().setMessage("adding junk file").call();
 
-        flow.hotfixFinish("1.0").setFetch(true).call();
+        flow.hotfixFinish("1.1").setFetch(true).call();
 
     }
 
     @Test
     public void finishHotfixMasterIsTagged() throws Exception
     {
-        Git git = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        Git git = RepoUtil.createRepositoryWithMasterAndTag(newDir());
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
@@ -348,7 +348,7 @@ public class HotfixFinishTest extends BaseGitFlowTest
 
         RevCommit oldMasterHead = GitHelper.getLatestCommit(git, masterBranchName);
 
-        flow.hotfixStart("1.0").call();
+        flow.hotfixStart("1.1").call();
 
         // Make sure we move away from master on a hotfix branch
         // This is important to validate JGITFFLOW-14
@@ -359,13 +359,13 @@ public class HotfixFinishTest extends BaseGitFlowTest
         git.add().addFilepattern(junkFile.getName()).call();
         git.commit().setMessage("committing junk file").call();
 
-        flow.hotfixFinish("1.0").setNoTag(false).call();
+        flow.hotfixFinish("1.1").setNoTag(false).call();
 
         //we should be on develop branch
         assertEquals(flow.getDevelopBranchName(), git.getRepository().getBranch());
 
         // There should be a tag reference
-        Ref hotfixTagRef = git.getRepository().getTags().get(flow.getVersionTagPrefix() + "1.0");
+        Ref hotfixTagRef = git.getRepository().getTags().get(flow.getVersionTagPrefix() + "1.1");
 
         assertNotNull(hotfixTagRef);
 
