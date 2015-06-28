@@ -107,7 +107,7 @@ public class GitFlowConfiguration
      */
     public boolean gitFlowIsInitialized() throws JGitFlowGitAPIException
     {
-        return (hasMasterConfigured() && hasDevelopConfigured() && !getMaster().equals(getDevelop()) && hasPrefixesConfigured());
+        return (hasDevelopConfigured() && hasPrefixesConfigured());
     }
 
     /**
@@ -117,15 +117,6 @@ public class GitFlowConfiguration
     public boolean hasDevelopConfigured() throws JGitFlowGitAPIException
     {
         return GitHelper.localBranchExists(git, git.getRepository().getConfig().getString(JGitFlowConstants.SECTION, ConfigConstants.CONFIG_BRANCH_SECTION, JGitFlowConstants.DEVELOP_KEY));
-    }
-
-    /**
-     * @return if the local master branch exists
-     * @throws com.atlassian.jgitflow.core.exception.JGitFlowGitAPIException
-     */
-    public boolean hasMasterConfigured() throws JGitFlowGitAPIException
-    {
-        return GitHelper.localBranchExists(git, git.getRepository().getConfig().getString(JGitFlowConstants.SECTION, ConfigConstants.CONFIG_BRANCH_SECTION, Constants.MASTER));
     }
 
     /**

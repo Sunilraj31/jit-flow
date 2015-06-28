@@ -148,37 +148,7 @@ public class JGitFlowInitCommand implements Callable<JGitFlow>
                 throw new AlreadyInitializedException("Already initialized for git flow.");
             }
 
-            //First setup master
-            if (gfConfig.hasMasterConfigured() && !force)
-            {
-                context.setMaster(gfConfig.getMaster());
-            }
-
-            //TODO: we should set an allowFetch flag and do a complete fetch before the local/remote checks if needed.
-            //if no local master exists, but a remote does, check it out
-            if (!GitHelper.localBranchExists(git, context.getMaster()) && GitHelper.remoteBranchExists(git, context.getMaster()))
-            {
-                reporter.debugText(SHORT_NAME, "creating new local '" + context.getMaster() + "' branch from origin '" + context.getMaster() + "'");
-                git.branchCreate()
-                   .setName(context.getMaster())
-                   .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
-                   .setStartPoint("origin/" + context.getMaster())
-                   .call();
-            }
-
-
-            gfConfig.setMaster(context.getMaster());
-
-            if (allowRemote && pullMaster && GitHelper.remoteBranchExists(git, context.getMaster()))
-            {
-                reporter.debugText("JgitFlowInitCommand", "pulling '" + context.getMaster());
-                reporter.flush();
-
-                git.checkout().setName(context.getMaster()).call();
-                git.pull().call();
-            }
-
-            //now setup develop
+            // setup develop
             if (gfConfig.hasDevelopConfigured() && !force)
             {
                 context.setDevelop(gfConfig.getDevelop());
@@ -215,17 +185,6 @@ public class JGitFlowInitCommand implements Callable<JGitFlow>
                 {
                     //ignore
                 }
-            }
-
-            if (null == masterCommit)
-            {
-                reporter.debugText(SHORT_NAME, "no commits found on '" + context.getMaster() + "'. creating initial commit.");
-                RefUpdate refUpdate = repo.getRefDatabase().newUpdate(Constants.HEAD, false);
-                refUpdate.setForceUpdate(true);
-                refUpdate.link(Constants.R_HEADS + context.getMaster());
-
-                git.commit().setMessage("Initial Commit").call();
-
             }
 
             //creation of develop

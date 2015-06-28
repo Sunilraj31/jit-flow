@@ -115,7 +115,7 @@ public class ReleaseFinishCommand extends AbstractBranchMergingCommand<ReleaseFi
             doFetchIfNeeded(extension);
 
 
-            ensureLocalBranchesNotBehindRemotes(prefixedBranchName, gfConfig.getMaster(), gfConfig.getDevelop());
+            ensureLocalBranchesNotBehindRemotes(prefixedBranchName, gfConfig.getDevelop());
 
             //checkout the branch to merge just so we can run any extensions that need to be on this branch
             checkoutTopicBranch(prefixedBranchName, extension);
@@ -136,7 +136,7 @@ public class ReleaseFinishCommand extends AbstractBranchMergingCommand<ReleaseFi
                 //now, tag master
                 if (!noTag && masterResult.getMergeStatus().isSuccessful())
                 {
-                    doTag(gfConfig.getMaster(), getMessage(), masterResult, extension);
+                    doTag("HEAD", getMessage(), masterResult, extension);
                 }
 
                 //IMPORTANT: we need to back-merge master into develop so that git describe works properly
@@ -147,13 +147,13 @@ public class ReleaseFinishCommand extends AbstractBranchMergingCommand<ReleaseFi
                     log.debug("back merging master to develop...");
                 }
 
-                developResult = doMerge(gfConfig.getMaster(), gfConfig.getDevelop(), developExtension, squash);
+                developResult = doMerge("HEAD", gfConfig.getDevelop(), developExtension, squash);
 
                 mergeSuccess = checkMergeResults(masterResult, developResult);
 
                 if (mergeSuccess)
                 {
-                    doPushIfNeeded(extension, !noTag, gfConfig.getDevelop(), gfConfig.getMaster(), prefixedBranchName);
+                    doPushIfNeeded(extension, !noTag, gfConfig.getDevelop(), prefixedBranchName);
                 }
             }
 
