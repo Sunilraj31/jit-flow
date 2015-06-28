@@ -2,11 +2,9 @@ package com.atlassian.jgitflow.core.util;
 
 import com.atlassian.jgitflow.core.JGitFlowConstants;
 import com.atlassian.jgitflow.core.JGitFlowReporter;
-import com.atlassian.jgitflow.core.TaggedVersion;
 import com.atlassian.jgitflow.core.exception.JGitFlowGitAPIException;
 import com.atlassian.jgitflow.core.exception.JGitFlowIOException;
 import com.atlassian.jgitflow.core.exception.LocalBranchMissingException;
-import org.apache.maven.shared.release.versions.VersionParseException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -597,7 +595,7 @@ public class GitHelper
             List<Ref> refs = git.tagList().call();
             for (Ref ref : refs)
             {
-                String simpleName = getSimpleTagName(ref.getName());
+                String simpleName = ref.getName().substring(ref.getName().indexOf(Constants.R_TAGS) + Constants.R_TAGS.length());
                 if (simpleName.equals(tagName))
                 {
                     exists = true;
@@ -621,10 +619,6 @@ public class GitHelper
         } catch (IOException e) {
             throw new JGitFlowIOException(e);
         }
-    }
-
-    public static String getSimpleTagName(String tagName) {
-        return tagName.substring(tagName.indexOf(Constants.R_TAGS) + Constants.R_TAGS.length());
     }
 
     private static String getName()

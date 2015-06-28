@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import static com.atlassian.jgitflow.core.util.Preconditions.checkNotNull;
@@ -174,15 +175,15 @@ public abstract class AbstractGitFlowCommand<C, T> implements Callable<T>, JGitF
     }
 
     private List<TaggedVersion> findTaggedVersions() throws JGitFlowGenericException, GitAPIException {
-        List<Ref> tags = git.tagList().call();
+        Map<String, Ref> tags = git.getRepository().getTags();
         List<TaggedVersion> taggedVersions = new ArrayList<TaggedVersion>();
-        for (Ref tag : tags) {
+        for (Map.Entry<String, Ref> tagEntry : tags.entrySet()) {
             try {
-                String simpleTagName = GitHelper.getSimpleTagName(tag.getName());
+                String simpleTagName = tagEntry.getKey();
                 String tagPrefix = gfConfig.getPrefixValue(JGitFlowConstants.PREFIXES.VERSIONTAG.configKey());
                 String simpleTagNameWithoutPrefix =
                         simpleTagName.substring(simpleTagName.indexOf(tagPrefix) + tagPrefix.length());
-                taggedVersions.add(new TaggedVersion(simpleTagNameWithoutPrefix, tag));
+                taggedVersions.add(new TaggedVersion(simpleTagNameWithoutPrefix, tagEntry.getValue()));
             } catch (VersionParseException e) {
                 throw new JGitFlowGenericException("Tag name is not a valid version", e);
             }
