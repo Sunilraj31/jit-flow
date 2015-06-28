@@ -188,7 +188,7 @@ public class ReleaseFinishCommand extends AbstractBranchMergingCommand<ReleaseFi
     private String findLatestTaggedCommit() throws GitAPIException, JGitFlowGenericException, JGitFlowIOException {
         List<TaggedVersion> taggedVersions = findTaggedVersions();
         TaggedVersion latestTaggedVersion = Collections.max(taggedVersions);
-        return GitHelper.findTaggedCommit(git, latestTaggedVersion.getTag());
+        return GitHelper.getTaggedCommit(git, latestTaggedVersion.getTag());
     }
 
     private List<TaggedVersion> findTaggedVersions() throws JGitFlowGenericException, GitAPIException {

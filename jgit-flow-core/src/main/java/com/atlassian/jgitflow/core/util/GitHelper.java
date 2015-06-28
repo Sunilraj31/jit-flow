@@ -613,7 +613,7 @@ public class GitHelper
         }
     }
 
-    public static String findTaggedCommit(Git git, Ref tag) throws JGitFlowIOException {
+    public static String getTaggedCommit(Git git, Ref tag) throws JGitFlowIOException {
         RevWalk revWalk = new RevWalk(git.getRepository());
         try {
             RevTag annotatedTag = revWalk.parseTag(tag.getObjectId());
