@@ -70,7 +70,7 @@ public class HotfixFinishTest extends BaseGitFlowTest
 
         //we should be on develop branch
         assertEquals(flow.getDevelopBranchName(), git.getRepository().getBranch());
-        FileUtils.writeStringToFile(versionFile, "develop");
+        FileUtils.writeStringToFile(versionFile, "master");
         git.add().addFilepattern(".").call();
         git.commit().setMessage("commiting develop").call();
 
@@ -176,7 +176,7 @@ public class HotfixFinishTest extends BaseGitFlowTest
 
         String releaseName = "release/1.0";
 
-        flow.git().checkout().setName("develop").call();
+        flow.git().checkout().setName("master").call();
 
         flow.hotfixStart("1.0.1").call();
 
