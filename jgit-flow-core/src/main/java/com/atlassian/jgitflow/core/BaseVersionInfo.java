@@ -11,23 +11,23 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class BaseVersionInfo<T extends BaseVersionInfo<T>> implements VersionInfo {
+public class BaseVersionInfo implements VersionInfo {
 
-    protected final String strVersion;
+    protected String strVersion;
 
-    protected final List<String> digits;
+    protected List<String> digits;
 
     protected String annotation;
 
     protected String annotationRevision;
 
-    protected final String buildSpecifier;
+    protected String buildSpecifier;
 
     protected String annotationSeparator;
 
     protected String annotationRevSeparator;
 
-    protected final String buildSeparator;
+    protected String buildSeparator;
 
     private static final int DIGITS_INDEX = 1;
 
@@ -45,7 +45,7 @@ public class BaseVersionInfo<T extends BaseVersionInfo<T>> implements VersionInf
 
     private static final String SNAPSHOT_IDENTIFIER = "SNAPSHOT";
 
-    private static final String DIGIT_SEPARATOR_STRING = ".";
+    protected static final String DIGIT_SEPARATOR_STRING = ".";
 
     public static final Pattern STANDARD_PATTERN = Pattern.compile(
             "^((?:\\d+\\.)*\\d+)"      // digit(s) and '.' repeated - followed by digit (version digits 1.22.0, etc)
@@ -128,6 +128,9 @@ public class BaseVersionInfo<T extends BaseVersionInfo<T>> implements VersionInf
         }
     }
 
+    protected BaseVersionInfo() {
+    }
+
     /**
      * Compares this {@link BaseVersionInfo} to the supplied {@link BaseVersionInfo}
      * to determine which version is greater.
@@ -139,7 +142,7 @@ public class BaseVersionInfo<T extends BaseVersionInfo<T>> implements VersionInf
     @Override
     public int compareTo(VersionInfo obj)
     {
-        T that = (T) obj;
+        BaseVersionInfo that = (BaseVersionInfo) obj;
 
         int result;
         // TODO: this is a workaround for a bug in DefaultArtifactVersion - fix there - 1.01 < 1.01.01
