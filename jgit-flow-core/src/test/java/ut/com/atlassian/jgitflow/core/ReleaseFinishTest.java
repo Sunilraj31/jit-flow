@@ -54,7 +54,7 @@ public class ReleaseFinishTest extends BaseGitFlowTest
     @Test
     public void finishReleaseWithExistingTags() throws Exception
     {
-        Git git = RepoUtil.createRepositoryWithMaster(newDir());
+        Git git = RepoUtil.createRepositoryWithoutMaster(newDir());
         git.tag().setName("0.9").setAnnotated(true).setMessage("tagged release 0.9").call();
         git.tag().setName("0.12").setAnnotated(true).setMessage("tagged release 0.12").call();
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
