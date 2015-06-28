@@ -51,6 +51,31 @@ public class ReleaseFinishTest extends BaseGitFlowTest
 
     }
 
+    @Test
+    public void finishReleaseWithExistingTags() throws Exception
+    {
+        Git git = RepoUtil.createRepositoryWithMaster(newDir());
+        git.tag().setName("0.9").setAnnotated(true).setMessage("tagged release 0.9").call();
+        git.tag().setName("0.12").setAnnotated(true).setMessage("tagged release 0.12").call();
+        JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
+        JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
+
+        flow.releaseStart("1.0").call();
+
+        assertEquals(flow.getReleaseBranchPrefix() + "1.0", git.getRepository().getBranch());
+
+        ReleaseMergeResult result = flow.releaseFinish("1.0").call();
+
+        assertTrue(result.wasSuccessful());
+
+        //we should be on develop branch
+        assertEquals(flow.getDevelopBranchName(), git.getRepository().getBranch());
+
+        //release branch should be gone
+        Ref ref2check = git.getRepository().getRef(flow.getReleaseBranchPrefix() + "1.0");
+        assertNull(ref2check);
+    }
+
     @Test(expected = DirtyWorkingTreeException.class)
     public void finishReleaseWithUnStagedFile() throws Exception
     {
