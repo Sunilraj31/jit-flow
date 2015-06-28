@@ -14,6 +14,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.transport.TagOpt;
 import org.junit.Test;
 
 import ut.com.atlassian.jgitflow.core.testutils.RepoUtil;
@@ -49,7 +50,7 @@ public class HotfixStartTest extends BaseGitFlowTest
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
+        git.push().setRemote("origin").add("master").call();
 
         //do a commit to the remote develop branch
         remoteGit.checkout().setName("master").call();
@@ -57,15 +58,16 @@ public class HotfixStartTest extends BaseGitFlowTest
         FileUtils.writeStringToFile(junkFile, "I am junk");
         remoteGit.add().addFilepattern(junkFile.getName()).call();
         remoteGit.commit().setMessage("adding junk file").call();
+        remoteGit.tag().setName("1.1").setAnnotated(true).setMessage("tagging release 1.1").call();
 
         //update local
+        git.fetch().setTagOpt(TagOpt.FETCH_TAGS).call();
         git.checkout().setName("master").call();
         git.pull().call();
-        git.checkout().setName("develop").call();
 
-        flow.hotfixStart("1.0").setFetch(true).call();
+        flow.hotfixStart("1.2").setFetch(true).call();
 
-        assertEquals(flow.getHotfixBranchPrefix() + "1.0", git.getRepository().getBranch());
+        assertEquals(flow.getHotfixBranchPrefix() + "1.2", git.getRepository().getBranch());
     }
 
     @Test
@@ -79,7 +81,7 @@ public class HotfixStartTest extends BaseGitFlowTest
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
+        git.push().setRemote("origin").add("master").call();
 
         flow.hotfixStart("1.0").setFetch(true).setPush(true).call();
 
@@ -106,8 +108,9 @@ public class HotfixStartTest extends BaseGitFlowTest
         FileUtils.writeStringToFile(junkFile, "I am junk");
         remoteGit.add().addFilepattern(junkFile.getName()).call();
         remoteGit.commit().setMessage("adding junk file").call();
+        remoteGit.tag().setName("1.1").setAnnotated(true).setMessage("tagging release 1.1").call();
 
-        flow.hotfixStart("1.0").setFetch(true).call();
+        flow.hotfixStart("1.2").setFetch(true).call();
 
     }
 
@@ -130,10 +133,11 @@ public class HotfixStartTest extends BaseGitFlowTest
         FileUtils.writeStringToFile(junkFile, "I am junk");
         remoteGit.add().addFilepattern(junkFile.getName()).call();
         remoteGit.commit().setMessage("adding junk file").call();
+        remoteGit.tag().setName("1.1").setAnnotated(true).setMessage("tagging release 1.1").call();
 
-        flow.hotfixStart("1.0").call();
+        flow.hotfixStart("1.2").call();
 
-        assertEquals(flow.getHotfixBranchPrefix() + "1.0", git.getRepository().getBranch());
+        assertEquals(flow.getHotfixBranchPrefix() + "1.2", git.getRepository().getBranch());
 
     }
 
@@ -204,16 +208,17 @@ public class HotfixStartTest extends BaseGitFlowTest
         FileUtils.writeStringToFile(junkFile, "I am junk");
         git.add().addFilepattern(junkFile.getName()).call();
         RevCommit commit = git.commit().setMessage("committing junk file").call();
+        git.tag().setName("1.1").setAnnotated(true).setMessage("tagging release 1.1").call();
 
         //make sure master has our commit
         assertTrue(GitHelper.isMergedInto(git, commit, flow.getMasterBranchName()));
 
-        flow.hotfixStart("1.0").call();
+        flow.hotfixStart("1.2").call();
 
-        assertEquals(flow.getHotfixBranchPrefix() + "1.0", git.getRepository().getBranch());
+        assertEquals(flow.getHotfixBranchPrefix() + "1.2", git.getRepository().getBranch());
 
         //the hotfix branch should have our commit
-        assertTrue("hotfix branch does not have our commit: " + commit.toString(), GitHelper.isMergedInto(git, commit, flow.getHotfixBranchPrefix() + "1.0"));
+        assertTrue("hotfix branch does not have our commit: " + commit.toString(), GitHelper.isMergedInto(git, commit, flow.getHotfixBranchPrefix() + "1.2"));
 
     }
 
@@ -279,7 +284,7 @@ public class HotfixStartTest extends BaseGitFlowTest
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
+        git.push().setRemote("origin").add("master").call();
 
         //add the remote tag
         remoteGit.tag().setName(flow.getVersionTagPrefix() + "1.0").call();
@@ -299,7 +304,7 @@ public class HotfixStartTest extends BaseGitFlowTest
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
+        git.push().setRemote("origin").add("master").call();
 
         //add the remote tag
         remoteGit.tag().setName(flow.getVersionTagPrefix() + "1.0").call();
