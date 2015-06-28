@@ -3,23 +3,24 @@ package com.atlassian.jgitflow.core.command;
 import com.atlassian.jgitflow.core.GitFlowConfiguration;
 import com.atlassian.jgitflow.core.JGitFlowConstants;
 import com.atlassian.jgitflow.core.ReleaseMergeResult;
+import com.atlassian.jgitflow.core.TaggedVersion;
 import com.atlassian.jgitflow.core.exception.*;
 import com.atlassian.jgitflow.core.extension.ReleaseFinishExtension;
 import com.atlassian.jgitflow.core.extension.impl.EmptyReleaseFinishExtension;
 import com.atlassian.jgitflow.core.extension.impl.MergeProcessExtensionWrapper;
-
 import com.atlassian.jgitflow.core.util.GitHelper;
+import org.apache.maven.shared.release.versions.VersionParseException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.revwalk.RevTag;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static com.atlassian.jgitflow.core.util.Preconditions.checkState;
 
@@ -99,7 +100,7 @@ public class ReleaseFinishCommand extends AbstractBranchMergingCommand<ReleaseFi
      * @throws com.atlassian.jgitflow.core.exception.BranchOutOfDateException
      */
     @Override
-    public ReleaseMergeResult call() throws JGitFlowGitAPIException, LocalBranchMissingException, DirtyWorkingTreeException, JGitFlowIOException, BranchOutOfDateException, JGitFlowExtensionException, NotInitializedException
+    public ReleaseMergeResult call() throws JGitFlowGitAPIException, LocalBranchMissingException, DirtyWorkingTreeException, JGitFlowIOException, BranchOutOfDateException, JGitFlowExtensionException, NotInitializedException, JGitFlowGenericException
     {
         String prefixedBranchName = runBeforeAndGetPrefixedBranchName(extension.before(), JGitFlowConstants.PREFIXES.RELEASE);
 
@@ -129,7 +130,7 @@ public class ReleaseFinishCommand extends AbstractBranchMergingCommand<ReleaseFi
                 //first merge master
                 MergeProcessExtensionWrapper masterExtension = new MergeProcessExtensionWrapper(extension.beforeMasterCheckout(), extension.afterMasterCheckout(), extension.beforeMasterMerge(), extension.afterMasterMerge());
 
-                String latestTaggedCommit = GitHelper.findLatestTaggedCommit(git);
+                String latestTaggedCommit = findLatestTaggedCommit();
                 masterResult = doMerge(prefixedBranchName, latestTaggedCommit, masterExtension, squash);
 
                 //now, tag master
@@ -184,6 +185,24 @@ public class ReleaseFinishCommand extends AbstractBranchMergingCommand<ReleaseFi
         }
     }
 
+    private String findLatestTaggedCommit() throws GitAPIException, JGitFlowGenericException, JGitFlowIOException {
+        List<TaggedVersion> taggedVersions = findTaggedVersions();
+        TaggedVersion latestTaggedVersion = Collections.max(taggedVersions);
+        return GitHelper.findTaggedCommit(git, latestTaggedVersion.getTag());
+    }
+
+    private List<TaggedVersion> findTaggedVersions() throws JGitFlowGenericException, GitAPIException {
+        List<Ref> tags = git.tagList().call();
+        List<TaggedVersion> taggedVersions = new ArrayList<TaggedVersion>();
+        for (Ref tag : tags) {
+            try {
+                taggedVersions.add(new TaggedVersion(GitHelper.getSimpleTagName(tag.getName()), tag));
+            } catch (VersionParseException e) {
+                throw new JGitFlowGenericException("Tag name is not a valid version", e);
+            }
+        }
+        return taggedVersions;
+    }
 
     /**
      * Set whether to turn off tagging

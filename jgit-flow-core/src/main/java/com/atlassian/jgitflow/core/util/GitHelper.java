@@ -613,30 +613,17 @@ public class GitHelper
         }
     }
 
-    public static String findLatestTaggedCommit(Git git) throws GitAPIException, JGitFlowIOException {
+    public static String findTaggedCommit(Git git, Ref tag) throws JGitFlowIOException {
+        RevWalk revWalk = new RevWalk(git.getRepository());
         try {
-            Ref latestTagRef = findLatestTag(git);
-            RevWalk revWalk = new RevWalk(git.getRepository());
-            RevTag latestTag = revWalk.parseTag(latestTagRef.getObjectId());
-            return latestTag.getObject().getName();
+            RevTag annotatedTag = revWalk.parseTag(tag.getObjectId());
+            return annotatedTag.getObject().getName();
         } catch (IOException e) {
             throw new JGitFlowIOException(e);
-        } catch (VersionParseException e) {
-            throw new JGitFlowIOException("Tag name is not a valid version", e);
         }
     }
 
-    private static Ref findLatestTag(Git git) throws GitAPIException, VersionParseException {
-        List<Ref> tags = git.tagList().call();
-        List<TaggedVersion> taggedVersions = new ArrayList<TaggedVersion>();
-        for (Ref tag : tags) {
-            taggedVersions.add(new TaggedVersion(getSimpleTagName(tag.getName()), tag));
-        }
-        TaggedVersion latestTaggedVersion = Collections.max(taggedVersions);
-        return latestTaggedVersion.getTag();
-    }
-
-    private static String getSimpleTagName(String tagName) {
+    public static String getSimpleTagName(String tagName) {
         return tagName.substring(tagName.indexOf(Constants.R_TAGS) + Constants.R_TAGS.length());
     }
 
