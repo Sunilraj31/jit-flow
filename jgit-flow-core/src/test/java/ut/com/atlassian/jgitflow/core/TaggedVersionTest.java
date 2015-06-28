@@ -22,6 +22,8 @@ public class TaggedVersionTest {
 		assertTrue(compare("2.4.8", "2.4.7") > 0);
 		assertTrue(compare("2", "1.3.0") > 0);
 		assertTrue(compare("2.0.0", "1.3") > 0);
+		assertTrue(compare("0.12", "0.9") > 0);
+		assertTrue(compare("15.0", "3.0") > 0);
 	}
 
 	private int compare(String version1, String version2) throws VersionParseException {
