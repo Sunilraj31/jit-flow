@@ -13,11 +13,15 @@ import org.apache.maven.shared.release.versions.VersionParseException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.errors.AmbiguousObjectException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -136,7 +140,7 @@ public class ReleaseFinishCommand extends AbstractBranchMergingCommand<ReleaseFi
                 //now, tag master
                 if (!noTag && masterResult.getMergeStatus().isSuccessful())
                 {
-                    doTag("HEAD", getMessage(), masterResult, extension);
+                    doTag(Constants.HEAD, getMessage(), masterResult, extension);
                 }
 
                 //IMPORTANT: we need to back-merge master into develop so that git describe works properly
@@ -147,7 +151,8 @@ public class ReleaseFinishCommand extends AbstractBranchMergingCommand<ReleaseFi
                     log.debug("back merging master to develop...");
                 }
 
-                developResult = doMerge("HEAD", gfConfig.getDevelop(), developExtension, squash);
+                latestTaggedCommit = git.getRepository().resolve(Constants.HEAD).getName();
+                developResult = doMerge(latestTaggedCommit, gfConfig.getDevelop(), developExtension, squash);
 
                 mergeSuccess = checkMergeResults(masterResult, developResult);
 
@@ -177,6 +182,11 @@ public class ReleaseFinishCommand extends AbstractBranchMergingCommand<ReleaseFi
         {
             reporter.errorText(getCommandName(), e.getMessage());
             throw new JGitFlowGitAPIException(e);
+        }
+        catch (IOException e)
+        {
+            reporter.errorText(getCommandName(), e.getMessage());
+            throw new JGitFlowGenericException(e);
         }
         finally
         {

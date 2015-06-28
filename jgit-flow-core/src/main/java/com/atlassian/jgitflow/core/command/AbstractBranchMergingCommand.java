@@ -9,7 +9,6 @@ import com.atlassian.jgitflow.core.exception.LocalBranchMissingException;
 import com.atlassian.jgitflow.core.extension.BranchMergingExtension;
 import com.atlassian.jgitflow.core.extension.impl.MergeProcessExtensionWrapper;
 import com.atlassian.jgitflow.core.util.GitHelper;
-
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeCommand;
 import org.eclipse.jgit.api.MergeResult;
@@ -20,6 +19,8 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.util.StringUtils;
+
+import java.io.IOException;
 
 public abstract class AbstractBranchMergingCommand<C, T> extends AbstractGitFlowCommand<C, T>
 {
@@ -60,11 +61,22 @@ public abstract class AbstractBranchMergingCommand<C, T> extends AbstractGitFlow
 
             runExtensionCommands(extension.beforeMerge());
 
-            Ref localBranchRef = GitHelper.getLocalBranch(git, branchToMerge);
+            ObjectId objectToMerge;
+            Ref refToMerge = GitHelper.getLocalBranch(git, branchToMerge);
+            if (refToMerge == null) {
+                try {
+                    objectToMerge = git.getRepository().resolve(branchToMerge);
+                } catch (IOException e) {
+                    // TODO better error handling
+                    throw new IllegalStateException("Cannot resolve commit", e);
+                }
+            } else {
+                objectToMerge = refToMerge.getObjectId();
+            }
             if (squash)
             {
                 reporter.infoText(getCommandName(), "squashing merge");
-                mergeResult = git.merge().setSquash(true).include(localBranchRef).call();
+                mergeResult = git.merge().setSquash(true).include(objectToMerge).call();
                 if (mergeResult.getMergeStatus().isSuccessful())
                 {
                     git.commit().setMessage(getScmMessagePrefix() + "squashing '" + branchToMerge + "' into '" + mergeTarget + "'" + getScmMessageSuffix()).call();
@@ -73,7 +85,7 @@ public abstract class AbstractBranchMergingCommand<C, T> extends AbstractGitFlow
             }
             else
             {
-                MergeCommand mergeCommand = git.merge().setFastForward(ffMode).include(localBranchRef);
+                MergeCommand mergeCommand = git.merge().setFastForward(ffMode).include(objectToMerge);
                 
                 // check if you want scmCommentSuffix/scmCommentPrefix in the comment (if either is set, it shuold be used for merge messages as well for consistency)
                 boolean isCustomScmMessage = (!StringUtils.isEmptyOrNull(getScmMessagePrefix())) || (!StringUtils.isEmptyOrNull(getScmMessageSuffix()));

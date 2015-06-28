@@ -116,7 +116,8 @@ public class ReleaseFinishTest extends BaseGitFlowTest
     @Test
     public void finishReleaseWithNewCommit() throws Exception
     {
-        Git git = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        Git git = RepoUtil.createRepositoryWithoutMaster(newDir());
+        git.tag().setName("0.9").setAnnotated(true).setMessage("tagged release 0.9").call();
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
@@ -149,11 +150,12 @@ public class ReleaseFinishTest extends BaseGitFlowTest
         //since fast-forward is suppressed the latest commit on develop should be a merge commit with 2 parents
         assertEquals(2, GitHelper.getLatestCommit(git, flow.getDevelopBranchName()).getParentCount());
 
+        Ref tag = git.getRepository().getRef("1.0");
         //the master branch should have our commit
-        assertTrue(GitHelper.isMergedInto(git, commit, flow.getMasterBranchName()));
+        assertTrue(GitHelper.isMergedInto(git, commit, GitHelper.getTaggedCommit(git, tag)));
 
         //since fast-forward is suppressed the latest commit on master should be a merge commit with 2 parents
-        assertEquals(2, GitHelper.getLatestCommit(git, flow.getMasterBranchName()).getParentCount());
+        assertEquals(2, GitHelper.getLatestCommit(git, GitHelper.getTaggedCommit(git, tag)).getParentCount());
     }
 
     @Test
