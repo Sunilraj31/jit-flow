@@ -1,7 +1,5 @@
 package com.atlassian.jgitflow.core;
 
-import jdk.nashorn.internal.runtime.Version;
-import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.shared.release.versions.VersionInfo;
 import org.apache.maven.shared.release.versions.VersionParseException;
@@ -13,7 +11,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ReleaseVersionInfo<T extends ReleaseVersionInfo<T>> implements VersionInfo {
+public class BaseVersionInfo<T extends BaseVersionInfo<T>> implements VersionInfo {
 
     protected final String strVersion;
 
@@ -75,7 +73,7 @@ public class ReleaseVersionInfo<T extends ReleaseVersionInfo<T>> implements Vers
      *
      * @param version
      */
-    public ReleaseVersionInfo(String version)
+    public BaseVersionInfo(String version)
             throws VersionParseException
     {
         strVersion = version;
@@ -131,7 +129,7 @@ public class ReleaseVersionInfo<T extends ReleaseVersionInfo<T>> implements Vers
     }
 
     /**
-     * Compares this {@link ReleaseVersionInfo} to the supplied {@link ReleaseVersionInfo}
+     * Compares this {@link BaseVersionInfo} to the supplied {@link BaseVersionInfo}
      * to determine which version is greater.
      *
      * @param obj the comparison version

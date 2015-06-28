@@ -5,11 +5,11 @@ import org.eclipse.jgit.lib.Ref;
 
 public class TaggedVersion implements Comparable<TaggedVersion> {
 
-	private final ReleaseVersionInfo version;
+	private final BaseVersionInfo version;
 	private final Ref tag;
 
 	public TaggedVersion(String version, Ref tag) throws VersionParseException {
-		this.version = new ReleaseVersionInfo(version);
+		this.version = new BaseVersionInfo(version);
 		this.tag = tag;
 	}
 
