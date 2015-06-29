@@ -47,10 +47,10 @@ public class FeatureStartTest extends BaseGitFlowTest
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
+        git.push().setRemote("origin").add("master").call();
 
-        //do a commit to the remote develop branch
-        remoteGit.checkout().setName("develop").call();
+        //do a commit to the remote master branch
+        remoteGit.checkout().setName("master").call();
         File junkFile = new File(remoteGit.getRepository().getWorkTree(), "junk.txt");
         FileUtils.writeStringToFile(junkFile, "I am junk");
         remoteGit.add().addFilepattern(junkFile.getName()).call();
@@ -75,7 +75,7 @@ public class FeatureStartTest extends BaseGitFlowTest
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
+        git.push().setRemote("origin").add("master").call();
 
         flow.featureStart("myFeature").setFetch(true).setPush(true).call();
 
@@ -94,10 +94,10 @@ public class FeatureStartTest extends BaseGitFlowTest
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
+        git.push().setRemote("origin").add("master").call();
 
-        //do a commit to the remote develop branch
-        remoteGit.checkout().setName("develop").call();
+        //do a commit to the remote master branch
+        remoteGit.checkout().setName("master").call();
         File junkFile = new File(remoteGit.getRepository().getWorkTree(), "junk.txt");
         FileUtils.writeStringToFile(junkFile, "I am junk");
         remoteGit.add().addFilepattern(junkFile.getName()).call();
@@ -144,8 +144,8 @@ public class FeatureStartTest extends BaseGitFlowTest
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        //do a commit to the remote develop branch
-        remoteGit.checkout().setName("develop").call();
+        //do a commit to the remote master branch
+        remoteGit.checkout().setName("master").call();
         File junkFile = new File(remoteGit.getRepository().getWorkTree(), "junk.txt");
         FileUtils.writeStringToFile(junkFile, "I am junk");
         remoteGit.add().addFilepattern(junkFile.getName()).call();
