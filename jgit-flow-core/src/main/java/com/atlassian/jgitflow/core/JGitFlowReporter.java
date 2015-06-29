@@ -240,19 +240,7 @@ public class JGitFlowReporter
           .append("    JGit Version: ").append(gitVersion)
           .append(EOL)
           .append("    JGitFlow Version: ").append(flowVersion)
-          .append(EOL)
-          .append("    Master name: ").append(config.getMaster())
           .append(EOL);
-
-        try
-        {
-            sb.append("    Origin master exists = ").append(GitHelper.remoteBranchExists(git, config.getMaster()))
-              .append(EOL);
-        }
-        catch (JGitFlowGitAPIException e)
-        {
-            //ignore
-        }
 
         sb.append("    Develop name: ").append(config.getDevelop())
           .append(EOL);

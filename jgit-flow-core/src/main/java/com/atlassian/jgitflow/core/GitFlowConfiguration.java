@@ -56,7 +56,9 @@ public class GitFlowConfiguration
      */
     public String getMaster()
     {
-        return git.getRepository().getConfig().getString(JGitFlowConstants.SECTION, ConfigConstants.CONFIG_BRANCH_SECTION, Constants.MASTER);
+        // TODO replace getDevelop() method with this method
+        throw new UnsupportedOperationException("Master branch from GitFlow is not supported");
+//        return git.getRepository().getConfig().getString(JGitFlowConstants.SECTION, ConfigConstants.CONFIG_BRANCH_SECTION, Constants.MASTER);
     }
 
     /**
