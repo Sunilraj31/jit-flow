@@ -80,23 +80,24 @@ public class
     }
 
     @Test
-    public void developExistsOnMaster() throws Exception
+    public void tagExistsOnMaster() throws Exception
     {
-        Git git = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
-        git.checkout().setName("develop").call();
+        Git git = RepoUtil.createRepositoryWithMaster(newDir());
+        git.checkout().setName(Constants.HEAD).call();
 
         //create a new commit
         File junkFile = new File(git.getRepository().getWorkTree(), "junk.txt");
         FileUtils.writeStringToFile(junkFile, "I am junk");
         git.add().addFilepattern(junkFile.getName()).call();
         git.commit().setMessage("committing junk file").call();
+        Ref tag = git.tag().setName("1.0").setAnnotated(true).setMessage("tagging release 1.0").call();
 
-        assertFalse(GitHelper.isMergedInto(git, "develop", "master"));
+        assertFalse(GitHelper.isMergedInto(git, "1.0", "master"));
 
         git.checkout().setName("master").call();
-        git.merge().include(GitHelper.getLocalBranch(git, "develop")).call();
+        git.merge().include(tag).call();
 
-        assertTrue(GitHelper.isMergedInto(git, "develop", "master"));
+        assertTrue(GitHelper.isMergedInto(git, "1.0", "master"));
 
     }
 
@@ -119,16 +120,17 @@ public class
     @Test
     public void developNotOnMaster() throws Exception
     {
-        Git git = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
-        git.checkout().setName("develop").call();
+        Git git = RepoUtil.createRepositoryWithMaster(newDir());
+        git.checkout().setName(Constants.HEAD).call();
 
         //create a new commit
         File junkFile = new File(git.getRepository().getWorkTree(), "junk.txt");
         FileUtils.writeStringToFile(junkFile, "I am junk");
         git.add().addFilepattern(junkFile.getName()).call();
         git.commit().setMessage("committing junk file").call();
+        git.tag().setName("1.0").setAnnotated(true).setMessage("tagging release 1.0").call();
 
-        assertFalse(GitHelper.isMergedInto(git, "develop", "master"));
+        assertFalse(GitHelper.isMergedInto(git, "1.0", "master"));
 
     }
 
