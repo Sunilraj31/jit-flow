@@ -25,7 +25,7 @@ public class GitFlowInitTest extends BaseGitFlowTest
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(workDir).call();
 
-        flow.git().checkout().setName("develop").call();
+        flow.git().checkout().setName("master").call();
         assertEquals(flow.getDevelopBranchName(), flow.git().getRepository().getBranch());
 
         File gitDir = new File(workDir, ".git");
@@ -38,8 +38,7 @@ public class GitFlowInitTest extends BaseGitFlowTest
         assertTrue(configText.contains("[gitflow \"branch\"]"));
         assertTrue(configText.contains("[gitflow \"prefix\"]"));
 
-        assertEquals("master", flow.getMasterBranchName());
-        assertEquals("develop", flow.getDevelopBranchName());
+        assertEquals("master", flow.getDevelopBranchName());
         assertEquals("feature/", flow.getFeatureBranchPrefix());
         assertEquals("release/", flow.getReleaseBranchPrefix());
         assertEquals("hotfix/", flow.getHotfixBranchPrefix());
@@ -70,7 +69,6 @@ public class GitFlowInitTest extends BaseGitFlowTest
         assertTrue(configText.contains("[gitflow \"branch\"]"));
         assertTrue(configText.contains("[gitflow \"prefix\"]"));
 
-        assertEquals("own", flow.getMasterBranchName());
         assertEquals("you", flow.getDevelopBranchName());
         assertEquals("feature/", flow.getFeatureBranchPrefix());
         assertEquals("release/", flow.getReleaseBranchPrefix());
@@ -87,7 +85,7 @@ public class GitFlowInitTest extends BaseGitFlowTest
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        flow.git().checkout().setName("develop").call();
+        flow.git().checkout().setName("master").call();
         assertEquals(flow.getDevelopBranchName(), flow.git().getRepository().getBranch());
 
         File gitDir = git.getRepository().getDirectory();
@@ -100,8 +98,7 @@ public class GitFlowInitTest extends BaseGitFlowTest
         assertTrue(configText.contains("[gitflow \"branch\"]"));
         assertTrue(configText.contains("[gitflow \"prefix\"]"));
 
-        assertEquals("master", flow.getMasterBranchName());
-        assertEquals("develop", flow.getDevelopBranchName());
+        assertEquals("master", flow.getDevelopBranchName());
         assertEquals("feature/", flow.getFeatureBranchPrefix());
         assertEquals("release/", flow.getReleaseBranchPrefix());
         assertEquals("hotfix/", flow.getHotfixBranchPrefix());
@@ -135,7 +132,6 @@ public class GitFlowInitTest extends BaseGitFlowTest
         assertTrue(configText.contains("[gitflow \"prefix\"]"));
 
 
-        assertEquals("own", flow.getMasterBranchName());
         assertEquals("you", flow.getDevelopBranchName());
         assertEquals("feature/", flow.getFeatureBranchPrefix());
         assertEquals("release/", flow.getReleaseBranchPrefix());
@@ -157,7 +153,7 @@ public class GitFlowInitTest extends BaseGitFlowTest
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(gfGit.getRepository().getWorkTree()).call();
 
-        flow.git().checkout().setName("develop").call();
+        flow.git().checkout().setName("master").call();
         assertEquals(flow.getDevelopBranchName(), flow.git().getRepository().getBranch());
 
         File gitDir = gfGit.getRepository().getDirectory();
@@ -171,8 +167,7 @@ public class GitFlowInitTest extends BaseGitFlowTest
         assertTrue(configText.contains("[gitflow \"prefix\"]"));
 
 
-        assertEquals("master", flow.getMasterBranchName());
-        assertEquals("develop", flow.getDevelopBranchName());
+        assertEquals("master", flow.getDevelopBranchName());
         assertEquals("feature/", flow.getFeatureBranchPrefix());
         assertEquals("release/", flow.getReleaseBranchPrefix());
         assertEquals("hotfix/", flow.getHotfixBranchPrefix());
@@ -210,7 +205,6 @@ public class GitFlowInitTest extends BaseGitFlowTest
         assertTrue(configText.contains("[gitflow \"prefix\"]"));
 
 
-        assertEquals("own", flow.getMasterBranchName());
         assertEquals("you", flow.getDevelopBranchName());
         assertEquals("feature/", flow.getFeatureBranchPrefix());
         assertEquals("release/", flow.getReleaseBranchPrefix());
@@ -249,7 +243,6 @@ public class GitFlowInitTest extends BaseGitFlowTest
         assertTrue(configText.contains("[gitflow \"prefix\"]"));
 
 
-        assertEquals("own", flow.getMasterBranchName());
         assertEquals("you", flow.getDevelopBranchName());
         assertEquals("feature/", flow.getFeatureBranchPrefix());
         assertEquals("release/", flow.getReleaseBranchPrefix());
@@ -306,8 +299,7 @@ public class GitFlowInitTest extends BaseGitFlowTest
         assertTrue(configText.contains("[gitflow \"prefix\"]"));
 
 
-        assertEquals("master", flow.getMasterBranchName());
-        assertEquals("develop", flow.getDevelopBranchName());
+        assertEquals("master", flow.getDevelopBranchName());
         assertEquals("feature/", flow.getFeatureBranchPrefix());
         assertEquals("release/", flow.getReleaseBranchPrefix());
         assertEquals("hotfix/", flow.getHotfixBranchPrefix());
@@ -343,9 +335,6 @@ public class GitFlowInitTest extends BaseGitFlowTest
         assertTrue(configText.contains("[gitflow \"branch\"]"));
         assertTrue(configText.contains("[gitflow \"prefix\"]"));
 
-        //here we check the new instance
-        assertEquals("own", flow2.getMasterBranchName());
-
         //now let's make sure the old instance also sees the config changes
         assertEquals("you", flow.getDevelopBranchName());
         assertEquals("feature/", flow.getFeatureBranchPrefix());
@@ -371,7 +360,7 @@ public class GitFlowInitTest extends BaseGitFlowTest
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(nested2).call();
 
-        flow.git().checkout().setName("develop").call();
+        flow.git().checkout().setName("master").call();
         assertEquals(flow.getDevelopBranchName(), flow.git().getRepository().getBranch());
 
         File gitDir = git.getRepository().getDirectory();
@@ -384,8 +373,7 @@ public class GitFlowInitTest extends BaseGitFlowTest
         assertTrue(configText.contains("[gitflow \"branch\"]"));
         assertTrue(configText.contains("[gitflow \"prefix\"]"));
 
-        assertEquals("master", flow.getMasterBranchName());
-        assertEquals("develop", flow.getDevelopBranchName());
+        assertEquals("master", flow.getDevelopBranchName());
         assertEquals("feature/", flow.getFeatureBranchPrefix());
         assertEquals("release/", flow.getReleaseBranchPrefix());
         assertEquals("hotfix/", flow.getHotfixBranchPrefix());
@@ -406,11 +394,8 @@ public class GitFlowInitTest extends BaseGitFlowTest
 
         remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
 
-        remoteGit.checkout().setName("develop").call();
         remoteGit.add().addFilepattern(".").call();
         remoteGit.commit().setMessage("initial commit").call();
-
-        remoteGit.branchDelete().setBranchNames("master").setForce(true).call();
 
         remoteGit.branchCreate().setName(featureBranch).call();
 

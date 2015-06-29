@@ -168,7 +168,7 @@ public class JGitFlowInitCommand implements Callable<JGitFlow>
 
             //Creation of HEAD
             walk = new RevWalk(repo);
-            ObjectId masterBranch = repo.resolve(Constants.R_HEADS + context.getMaster());
+            ObjectId masterBranch = repo.resolve(Constants.R_HEADS + context.getDevelop());
             RevCommit masterCommit = null;
 
             if (null != masterBranch)
@@ -187,6 +187,17 @@ public class JGitFlowInitCommand implements Callable<JGitFlow>
                 }
             }
 
+            if (null == masterCommit)
+            {
+                reporter.debugText(SHORT_NAME, "no commits found on '" + context.getDevelop() + "'. creating initial commit.");
+                RefUpdate refUpdate = repo.getRefDatabase().newUpdate(Constants.HEAD, false);
+                refUpdate.setForceUpdate(true);
+                refUpdate.link(Constants.R_HEADS + context.getDevelop());
+
+                git.commit().setMessage("Initial Commit").call();
+
+            }
+
             //creation of develop
             if (!GitHelper.localBranchExists(git, context.getDevelop()))
             {
@@ -197,14 +208,6 @@ public class JGitFlowInitCommand implements Callable<JGitFlow>
                        .setName(context.getDevelop())
                        .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
                        .setStartPoint("origin/" + context.getDevelop())
-                       .call();
-                }
-                else
-                {
-                    reporter.debugText(SHORT_NAME, "creating new local '" + context.getDevelop() + "' branch without origin");
-                    git.branchCreate()
-                       .setName(context.getDevelop())
-                       .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.NOTRACK)
                        .call();
                 }
             }
