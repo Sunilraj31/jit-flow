@@ -25,17 +25,16 @@ public class HotfixStartExtensionTest extends BaseGitFlowTest
     {
         Git git = null;
         Git remoteGit = null;
-        remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        remoteGit = RepoUtil.createRepositoryWithMasterAndTag(newDir());
 
         git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
 
         HotfixStartExtensionForTests extension = new HotfixStartExtensionForTests();
 
-        //do a commit to the remote develop branch
+        //do a commit to the remote master branch
         remoteGit.checkout().setName("master").call();
         File junkFile = new File(remoteGit.getRepository().getWorkTree(), "junk.txt");
         FileUtils.writeStringToFile(junkFile, "I am junk");
@@ -45,11 +44,10 @@ public class HotfixStartExtensionTest extends BaseGitFlowTest
         //update local
         git.checkout().setName("master").call();
         git.pull().call();
-        git.checkout().setName("develop").call();
 
-        flow.hotfixStart("1.0").setFetch(true).setPush(true).setExtension(extension).call();
+        flow.hotfixStart("1.1").setFetch(true).setPush(true).setExtension(extension).call();
 
-        assertEquals(flow.getHotfixBranchPrefix() + "1.0", git.getRepository().getBranch());
+        assertEquals(flow.getHotfixBranchPrefix() + "1.1", git.getRepository().getBranch());
 
         assertTrue("before was not called", extension.wasCalled(BaseExtensionForTests.BEFORE));
         assertTrue("beforeFetch was not called", extension.wasCalled(BaseExtensionForTests.BEFORE_FETCH));
@@ -65,18 +63,17 @@ public class HotfixStartExtensionTest extends BaseGitFlowTest
     {
         Git git = null;
         Git remoteGit = null;
-        remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        remoteGit = RepoUtil.createRepositoryWithMasterAndTag(newDir());
 
         git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
 
         HotfixStartExtensionForTests extension = new HotfixStartExtensionForTests();
         extension.withException(BaseExtensionForTests.AFTER_CREATE_BRANCH, ExtensionFailStrategy.ERROR);
 
-        //do a commit to the remote develop branch
+        //do a commit to the remote master branch
         remoteGit.checkout().setName("master").call();
         File junkFile = new File(remoteGit.getRepository().getWorkTree(), "junk.txt");
         FileUtils.writeStringToFile(junkFile, "I am junk");
@@ -86,11 +83,10 @@ public class HotfixStartExtensionTest extends BaseGitFlowTest
         //update local
         git.checkout().setName("master").call();
         git.pull().call();
-        git.checkout().setName("develop").call();
 
         try
         {
-            flow.hotfixStart("1.0").setFetch(true).setPush(true).setExtension(extension).call();
+            flow.hotfixStart("1.1").setFetch(true).setPush(true).setExtension(extension).call();
 
             fail("Exception should have been thrown!!");
         }
@@ -108,18 +104,17 @@ public class HotfixStartExtensionTest extends BaseGitFlowTest
     {
         Git git = null;
         Git remoteGit = null;
-        remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        remoteGit = RepoUtil.createRepositoryWithMasterAndTag(newDir());
 
         git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
 
         HotfixStartExtensionForTests extension = new HotfixStartExtensionForTests();
         extension.withException(BaseExtensionForTests.AFTER_CREATE_BRANCH, ExtensionFailStrategy.WARN);
 
-        //do a commit to the remote develop branch
+        //do a commit to the remote master branch
         remoteGit.checkout().setName("master").call();
         File junkFile = new File(remoteGit.getRepository().getWorkTree(), "junk.txt");
         FileUtils.writeStringToFile(junkFile, "I am junk");
@@ -129,11 +124,10 @@ public class HotfixStartExtensionTest extends BaseGitFlowTest
         //update local
         git.checkout().setName("master").call();
         git.pull().call();
-        git.checkout().setName("develop").call();
 
-        flow.hotfixStart("1.0").setFetch(true).setPush(true).setExtension(extension).call();
+        flow.hotfixStart("1.1").setFetch(true).setPush(true).setExtension(extension).call();
 
-        assertEquals(flow.getHotfixBranchPrefix() + "1.0", git.getRepository().getBranch());
+        assertEquals(flow.getHotfixBranchPrefix() + "1.1", git.getRepository().getBranch());
 
         assertTrue("before was not called", extension.wasCalled(BaseExtensionForTests.BEFORE));
         assertTrue("beforeFetch was not called", extension.wasCalled(BaseExtensionForTests.BEFORE_FETCH));

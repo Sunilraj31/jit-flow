@@ -26,28 +26,28 @@ public class ReleaseStartExtensionTest extends BaseGitFlowTest
     {
         Git git = null;
         Git remoteGit = null;
-        remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        remoteGit = RepoUtil.createRepositoryWithMasterAndTag(newDir());
 
         git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
+        git.push().setRemote("origin").add("master").call();
 
         ReleaseStartExtensionForTests extension = new ReleaseStartExtensionForTests();
 
-        //do a commit to the remote develop branch
-        remoteGit.checkout().setName("develop").call();
+        //do a commit to the remote master branch
+        remoteGit.checkout().setName("master").call();
         File junkFile = new File(remoteGit.getRepository().getWorkTree(), "junk.txt");
         FileUtils.writeStringToFile(junkFile, "I am junk");
         remoteGit.add().addFilepattern(junkFile.getName()).call();
         remoteGit.commit().setMessage("adding junk file").call();
 
         //update local
-        git.checkout().setName("develop").call();
+        git.checkout().setName("master").call();
         git.pull().call();
 
-        flow.releaseStart("1.0").setFetch(true).setPush(true).setExtension(extension).call();
+        flow.releaseStart("2.0").setFetch(true).setPush(true).setExtension(extension).call();
 
         assertTrue("before was not called", extension.wasCalled(BaseExtensionForTests.BEFORE));
         assertTrue("beforeFetch was not called", extension.wasCalled(BaseExtensionForTests.BEFORE_FETCH));
@@ -64,29 +64,29 @@ public class ReleaseStartExtensionTest extends BaseGitFlowTest
     {
         Git git = null;
         Git remoteGit = null;
-        remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        remoteGit = RepoUtil.createRepositoryWithMasterAndTag(newDir());
 
         git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
+        git.push().setRemote("origin").add("master").call();
 
         ReleaseStartExtensionForTests extension = new ReleaseStartExtensionForTests();
         extension.withException(BaseExtensionForTests.AFTER_CREATE_BRANCH, ExtensionFailStrategy.WARN);
 
-        //do a commit to the remote develop branch
-        remoteGit.checkout().setName("develop").call();
+        //do a commit to the remote master branch
+        remoteGit.checkout().setName("master").call();
         File junkFile = new File(remoteGit.getRepository().getWorkTree(), "junk.txt");
         FileUtils.writeStringToFile(junkFile, "I am junk");
         remoteGit.add().addFilepattern(junkFile.getName()).call();
         remoteGit.commit().setMessage("adding junk file").call();
 
         //update local
-        git.checkout().setName("develop").call();
+        git.checkout().setName("master").call();
         git.pull().call();
 
-        flow.releaseStart("1.0").setFetch(true).setPush(true).setExtension(extension).call();
+        flow.releaseStart("2.0").setFetch(true).setPush(true).setExtension(extension).call();
 
         assertTrue("before was not called", extension.wasCalled(BaseExtensionForTests.BEFORE));
         assertTrue("beforeFetch was not called", extension.wasCalled(BaseExtensionForTests.BEFORE_FETCH));
@@ -103,31 +103,31 @@ public class ReleaseStartExtensionTest extends BaseGitFlowTest
     {
         Git git = null;
         Git remoteGit = null;
-        remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        remoteGit = RepoUtil.createRepositoryWithMasterAndTag(newDir());
 
         git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
-        git.push().setRemote("origin").add("develop").call();
+        git.push().setRemote("origin").add("master").call();
 
         ReleaseStartExtensionForTests extension = new ReleaseStartExtensionForTests();
         extension.withException(BaseExtensionForTests.AFTER_CREATE_BRANCH, ExtensionFailStrategy.ERROR);
 
-        //do a commit to the remote develop branch
-        remoteGit.checkout().setName("develop").call();
+        //do a commit to the remote master branch
+        remoteGit.checkout().setName("master").call();
         File junkFile = new File(remoteGit.getRepository().getWorkTree(), "junk.txt");
         FileUtils.writeStringToFile(junkFile, "I am junk");
         remoteGit.add().addFilepattern(junkFile.getName()).call();
         remoteGit.commit().setMessage("adding junk file").call();
 
         //update local
-        git.checkout().setName("develop").call();
+        git.checkout().setName("master").call();
         git.pull().call();
 
         try
         {
-            flow.releaseStart("1.0").setFetch(true).setPush(true).setExtension(extension).call();
+            flow.releaseStart("2.0").setFetch(true).setPush(true).setExtension(extension).call();
 
             fail("Exception should have been thrown!!");
         }

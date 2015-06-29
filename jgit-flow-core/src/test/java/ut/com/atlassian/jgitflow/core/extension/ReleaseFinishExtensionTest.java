@@ -32,14 +32,14 @@ public class ReleaseFinishExtensionTest extends BaseGitFlowTest
     {
         Git git = null;
         Git remoteGit = null;
-        remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        remoteGit = RepoUtil.createRepositoryWithMasterAndTag(newDir());
 
         git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        flow.releaseStart("1.0").call();
+        flow.releaseStart("2.0").call();
 
         flow.git().push().setRemote("origin").call();
 
@@ -49,7 +49,7 @@ public class ReleaseFinishExtensionTest extends BaseGitFlowTest
 
         for (Ref remoteBranch : remoteBranches)
         {
-            if (remoteBranch.getName().equals(Constants.R_HEADS + flow.getReleaseBranchPrefix() + "1.0"))
+            if (remoteBranch.getName().equals(Constants.R_HEADS + flow.getReleaseBranchPrefix() + "2.0"))
             {
                 hasRemoteRelease = true;
                 break;
@@ -65,7 +65,7 @@ public class ReleaseFinishExtensionTest extends BaseGitFlowTest
 
         ReleaseFinishExtensionForTests extension = new ReleaseFinishExtensionForTests();
 
-        ReleaseMergeResult result = flow.releaseFinish("1.0").setFetch(true).setPush(true).setExtension(extension).call();
+        ReleaseMergeResult result = flow.releaseFinish("2.0").setFetch(true).setPush(true).setExtension(extension).call();
 
         assertTrue(result.wasSuccessful());
 
@@ -89,14 +89,14 @@ public class ReleaseFinishExtensionTest extends BaseGitFlowTest
     {
         Git git = null;
         Git remoteGit = null;
-        remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        remoteGit = RepoUtil.createRepositoryWithMasterAndTag(newDir());
 
         git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        flow.releaseStart("1.0").call();
+        flow.releaseStart("2.0").call();
 
         flow.git().push().setRemote("origin").call();
 
@@ -106,7 +106,7 @@ public class ReleaseFinishExtensionTest extends BaseGitFlowTest
 
         for (Ref remoteBranch : remoteBranches)
         {
-            if (remoteBranch.getName().equals(Constants.R_HEADS + flow.getReleaseBranchPrefix() + "1.0"))
+            if (remoteBranch.getName().equals(Constants.R_HEADS + flow.getReleaseBranchPrefix() + "2.0"))
             {
                 hasRemoteRelease = true;
                 break;
@@ -125,7 +125,7 @@ public class ReleaseFinishExtensionTest extends BaseGitFlowTest
 
         try
         {
-            ReleaseMergeResult result = flow.releaseFinish("1.0").setFetch(true).setPush(true).setExtension(extension).call();
+            ReleaseMergeResult result = flow.releaseFinish("2.0").setFetch(true).setPush(true).setExtension(extension).call();
 
             fail("Exception should have been thrown!!");
         }
@@ -146,14 +146,14 @@ public class ReleaseFinishExtensionTest extends BaseGitFlowTest
     {
         Git git = null;
         Git remoteGit = null;
-        remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+        remoteGit = RepoUtil.createRepositoryWithMasterAndTag(newDir());
 
         git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
 
         JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
         JGitFlow flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
 
-        flow.releaseStart("1.0").call();
+        flow.releaseStart("2.0").call();
 
         flow.git().push().setRemote("origin").call();
 
@@ -163,7 +163,7 @@ public class ReleaseFinishExtensionTest extends BaseGitFlowTest
 
         for (Ref remoteBranch : remoteBranches)
         {
-            if (remoteBranch.getName().equals(Constants.R_HEADS + flow.getReleaseBranchPrefix() + "1.0"))
+            if (remoteBranch.getName().equals(Constants.R_HEADS + flow.getReleaseBranchPrefix() + "2.0"))
             {
                 hasRemoteRelease = true;
                 break;
@@ -180,7 +180,7 @@ public class ReleaseFinishExtensionTest extends BaseGitFlowTest
         ReleaseFinishExtensionForTests extension = new ReleaseFinishExtensionForTests();
         extension.withException(BaseExtensionForTests.BEFORE_DEVELOP_CHECKOUT, ExtensionFailStrategy.WARN);
 
-        ReleaseMergeResult result = flow.releaseFinish("1.0").setFetch(true).setPush(true).setExtension(extension).call();
+        ReleaseMergeResult result = flow.releaseFinish("2.0").setFetch(true).setPush(true).setExtension(extension).call();
 
         assertTrue(result.wasSuccessful());
 
