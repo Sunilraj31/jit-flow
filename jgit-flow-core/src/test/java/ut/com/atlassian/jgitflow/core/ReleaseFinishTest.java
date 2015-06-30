@@ -196,7 +196,7 @@ public class ReleaseFinishTest extends BaseGitFlowTest
         assertFalse(GitHelper.isMergedInto(git, commit, flow.getDevelopBranchName()));
 
         //the master branch should NOT have our commit
-        assertFalse(GitHelper.isMergedInto(git, commit, flow.getMasterBranchName()));
+        assertFalse(GitHelper.isMergedInto(git, commit, "1.0"));
     }
 
     @Test
@@ -265,8 +265,8 @@ public class ReleaseFinishTest extends BaseGitFlowTest
         assertTrue(GitHelper.isMergedInto(git, commit2, flow.getDevelopBranchName()));
 
         //the master branch should have both of our commits now
-        assertTrue(GitHelper.isMergedInto(git, commit, flow.getMasterBranchName()));
-        assertTrue(GitHelper.isMergedInto(git, commit2, flow.getMasterBranchName()));
+        assertTrue(GitHelper.isMergedInto(git, commit, getTaggedCommit(git, "1.0")));
+        assertTrue(GitHelper.isMergedInto(git, commit2, getTaggedCommit(git, "1.0")));
     }
 
     @Test
@@ -311,8 +311,8 @@ public class ReleaseFinishTest extends BaseGitFlowTest
         assertFalse(GitHelper.isMergedInto(git, commit2, flow.getDevelopBranchName()));
 
         //the master branch should NOT have both of our commits now
-        assertFalse(GitHelper.isMergedInto(git, commit, flow.getMasterBranchName()));
-        assertFalse(GitHelper.isMergedInto(git, commit2, flow.getMasterBranchName()));
+        assertFalse(GitHelper.isMergedInto(git, commit, getTaggedCommit(git, "1.0")));
+        assertFalse(GitHelper.isMergedInto(git, commit2, getTaggedCommit(git, "1.0")));
 
         //we should have the release files
         git.checkout().setName(flow.getDevelopBranchName()).call();
@@ -321,7 +321,7 @@ public class ReleaseFinishTest extends BaseGitFlowTest
         assertTrue(developJunk.exists());
         assertTrue(developJunk2.exists());
 
-        git.checkout().setName(flow.getMasterBranchName()).call();
+        git.checkout().setName(getTaggedCommit(git, "1.0")).call();
         File masterJunk = new File(git.getRepository().getWorkTree(), "junk.txt");
         File masterJunk2 = new File(git.getRepository().getWorkTree(), "junk2.txt");
         assertTrue(masterJunk.exists());
@@ -370,7 +370,7 @@ public class ReleaseFinishTest extends BaseGitFlowTest
         flow.releaseStart("1.0").call();
 
         //do a commit to the remote master branch
-        remoteGit.checkout().setName(flow.getMasterBranchName()).call();
+        remoteGit.checkout().setName(flow.getDevelopBranchName()).call();
         File junkFile = new File(remoteGit.getRepository().getWorkTree(), "junk.txt");
         FileUtils.writeStringToFile(junkFile, "I am junk");
         remoteGit.add().addFilepattern(junkFile.getName()).call();
@@ -423,7 +423,7 @@ public class ReleaseFinishTest extends BaseGitFlowTest
 
         assertTrue(result.wasSuccessful());
 
-        assertTrue(GitHelper.isMergedInto(remoteGit, localcommit, flow.getMasterBranchName()));
+        assertTrue(GitHelper.isMergedInto(remoteGit, localcommit, getTaggedCommit(git, "1.0")));
         assertTrue(GitHelper.isMergedInto(remoteGit, localcommit, flow.getDevelopBranchName()));
         assertFalse(GitHelper.remoteBranchExists(git, flow.getReleaseBranchPrefix() + "1.0"));
         assertFalse(GitHelper.localBranchExists(remoteGit, flow.getReleaseBranchPrefix() + "1.0"));

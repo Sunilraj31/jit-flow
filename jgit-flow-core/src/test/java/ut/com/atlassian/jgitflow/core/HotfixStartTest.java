@@ -197,9 +197,6 @@ public class HotfixStartTest extends BaseGitFlowTest
         RevCommit commit = git.commit().setMessage("committing junk file").call();
         git.tag().setName("1.1").setAnnotated(true).setMessage("tagging release 1.1").call();
 
-        //make sure master has our commit
-        assertTrue(GitHelper.isMergedInto(git, commit, flow.getMasterBranchName()));
-
         flow.hotfixStart("1.2").call();
 
         assertEquals(flow.getHotfixBranchPrefix() + "1.2", git.getRepository().getBranch());

@@ -159,10 +159,10 @@ public class HotfixFinishTest extends BaseGitFlowTest
         assertEquals(2, GitHelper.getLatestCommit(git, flow.getDevelopBranchName()).getParentCount());
 
         //the master branch should have our commit
-        assertTrue(GitHelper.isMergedInto(git, commit, flow.getMasterBranchName()));
+        assertTrue(GitHelper.isMergedInto(git, commit, getTaggedCommit(git, "1.1")));
 
         //since fast-forward is suppressed the latest commit on master should be a merge commit with 2 parents
-        assertEquals(2, GitHelper.getLatestCommit(git, flow.getMasterBranchName()).getParentCount());
+        assertEquals(2, GitHelper.getLatestCommit(git, getTaggedCommit(git, "1.1")).getParentCount());
     }
 
     @Test
@@ -209,10 +209,10 @@ public class HotfixFinishTest extends BaseGitFlowTest
         assertEquals(2, GitHelper.getLatestCommit(git, flow.getDevelopBranchName()).getParentCount());
 
         //the master branch should have our commit
-        assertTrue(GitHelper.isMergedInto(git, commit, flow.getMasterBranchName()));
+        assertTrue(GitHelper.isMergedInto(git, commit, getTaggedCommit(git, "1.1.1")));
 
         //since fast-forward is suppressed the latest commit on master should be a merge commit with 2 parents
-        assertEquals(2, GitHelper.getLatestCommit(git, flow.getMasterBranchName()).getParentCount());
+        assertEquals(2, GitHelper.getLatestCommit(git, getTaggedCommit(git, "1.1.1")).getParentCount());
 
         //the release branch should have our commit
         assertTrue(GitHelper.isMergedInto(git, commit, releaseName));
@@ -283,8 +283,8 @@ public class HotfixFinishTest extends BaseGitFlowTest
         assertTrue(GitHelper.isMergedInto(git, commit2, flow.getDevelopBranchName()));
 
         //the master branch should have both of our commits now
-        assertTrue(GitHelper.isMergedInto(git, commit, flow.getMasterBranchName()));
-        assertTrue(GitHelper.isMergedInto(git, commit2, flow.getMasterBranchName()));
+        assertTrue(GitHelper.isMergedInto(git, commit, getTaggedCommit(git, "1.1")));
+        assertTrue(GitHelper.isMergedInto(git, commit2, getTaggedCommit(git, "1.1")));
     }
 
     @Test(expected = BranchOutOfDateException.class)
@@ -327,7 +327,7 @@ public class HotfixFinishTest extends BaseGitFlowTest
         flow.hotfixStart("1.1").call();
 
         //do a commit to the remote develop branch
-        remoteGit.checkout().setName(flow.getMasterBranchName());
+        remoteGit.checkout().setName(flow.getDevelopBranchName());
         File junkFile = new File(remoteGit.getRepository().getWorkTree(), "junk.txt");
         FileUtils.writeStringToFile(junkFile, "I am junk");
         remoteGit.add().addFilepattern(junkFile.getName()).call();

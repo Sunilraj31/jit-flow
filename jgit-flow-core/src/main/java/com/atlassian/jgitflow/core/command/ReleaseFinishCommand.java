@@ -127,7 +127,7 @@ public class ReleaseFinishCommand extends AbstractBranchMergingCommand<ReleaseFi
 
                 String taggingHead = findLatestTaggedCommit();
                 if (taggingHead == null) {
-                    taggingHead = prefixedBranchName;
+                    taggingHead = gfConfig.getDevelop();
                 }
                 masterResult = doMerge(prefixedBranchName, taggingHead, masterExtension, squash);
 
