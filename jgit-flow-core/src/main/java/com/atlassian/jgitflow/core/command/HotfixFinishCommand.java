@@ -14,6 +14,7 @@ import com.atlassian.jgitflow.core.util.GitHelper;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.util.StringUtils;
 
@@ -140,6 +141,9 @@ public class HotfixFinishCommand extends AbstractBranchMergingCommand<HotfixFini
                 String releaseBranchName = getReleaseBranchName();
                 MergeProcessExtensionWrapper releaseExtension = new MergeProcessExtensionWrapper(extension.beforeReleaseCheckout(), extension.afterReleaseCheckout(), extension.beforeReleaseMerge(), extension.afterReleaseMerge());
 
+                if (!GitHelper.localBranchExists(git, releaseBranchName) && GitHelper.remoteBranchExists(git, releaseBranchName)) {
+                    git.checkout().setName(releaseBranchName).setCreateBranch(true).call();
+                }
                 releaseResult = doMerge(gfConfig.getMaster(), releaseBranchName, releaseExtension);
 
                 boolean releaseMergeSuccess = checkMergeResults(releaseResult);
@@ -196,6 +200,12 @@ public class HotfixFinishCommand extends AbstractBranchMergingCommand<HotfixFini
         if (!branches.isEmpty())
         {
             branchName = branches.get(0).getName();
+
+            String originPrefix = Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME + "/";
+            if (branchName.indexOf(originPrefix) > -1)
+            {
+                branchName = branchName.substring(branchName.indexOf(originPrefix) + originPrefix.length());
+            }
         }
 
         return branchName;
