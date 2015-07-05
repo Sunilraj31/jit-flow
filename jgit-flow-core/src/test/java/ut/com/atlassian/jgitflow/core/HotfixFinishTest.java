@@ -222,6 +222,64 @@ public class HotfixFinishTest extends BaseGitFlowTest
     }
 
     @Test
+    public void finishHotfixWithNewCommitAndRemoteReleaseBranch() throws Exception {
+        Git remoteGit = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
+
+        Git git = Git.cloneRepository().setDirectory(newDir()).setURI("file://" + remoteGit.getRepository().getWorkTree().getPath()).call();
+        JGitFlowInitCommand initCommand = new JGitFlowInitCommand();
+        JGitFlow flow = initCommand.setDirectory(remoteGit.getRepository().getWorkTree()).call();
+
+        flow.releaseStart("1.0").call();
+
+        String releaseName = "release/1.0";
+
+        flow.git().checkout().setName("develop").call();
+
+        flow.hotfixStart("1.0.1").call();
+
+        //create a new commit
+        File junkFile = new File(remoteGit.getRepository().getWorkTree(), "junk.txt");
+        FileUtils.writeStringToFile(junkFile, "I am junk");
+        remoteGit.add().addFilepattern(junkFile.getName()).call();
+        RevCommit commit = remoteGit.commit().setMessage("committing junk file").call();
+
+        //make sure develop doesn't report our commit yet
+        assertFalse(GitHelper.isMergedInto(remoteGit, commit, flow.getDevelopBranchName()));
+
+        //make sure release doesn't report our commit yet
+        assertFalse(GitHelper.isMergedInto(remoteGit, commit, releaseName));
+
+        flow = initCommand.setDirectory(git.getRepository().getWorkTree()).call();
+        //try to finish
+        flow.hotfixFinish("1.0.1").setKeepBranch(false).call();
+
+        //we should be on develop branch
+        assertEquals(flow.getDevelopBranchName(), git.getRepository().getBranch());
+
+        //hotfix branch should be gone
+        Ref ref2check = git.getRepository().getRef(flow.getHotfixBranchPrefix() + "1.0.1");
+        assertNull(ref2check);
+
+        //the develop branch should have our commit
+        assertTrue(GitHelper.isMergedInto(git, commit, flow.getDevelopBranchName()));
+
+        //since fast-forward is suppressed the latest commit on develop should be a merge commit with 2 parents
+        assertEquals(2, GitHelper.getLatestCommit(git, flow.getDevelopBranchName()).getParentCount());
+
+        //the master branch should have our commit
+        assertTrue(GitHelper.isMergedInto(git, commit, flow.getMasterBranchName()));
+
+        //since fast-forward is suppressed the latest commit on master should be a merge commit with 2 parents
+        assertEquals(2, GitHelper.getLatestCommit(git, flow.getMasterBranchName()).getParentCount());
+
+        //the release branch should have our commit
+        assertTrue(GitHelper.isMergedInto(git, commit, releaseName));
+
+        //since fast-forward is suppressed the latest commit on the release branch should be a merge commit with 2 parents
+        assertEquals(2, GitHelper.getLatestCommit(git, releaseName).getParentCount());
+    }
+
+    @Test
     public void finishHotfixKeepBranch() throws Exception
     {
         Git git = RepoUtil.createRepositoryWithMasterAndDevelop(newDir());
